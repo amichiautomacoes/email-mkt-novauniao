@@ -1,0 +1,26 @@
+{
+  "3formas-melhorar-experiencia": {
+    "subject": "3 formas de melhorar a experiência do cliente na sua loja através da etiqueta",
+    "html": "3formas-melhorar-experiencia.html",
+    "links_validated": true,
+    "images_validated": true
+  },
+  "detalhe-loja": {
+    "subject": "Um detalhe que sua loja não pode esquecer",
+    "html": "detalhe-loja.html",
+    "links_validated": true,
+    "images_validated": true
+  },
+  "etiquetas-ideais": {
+    "subject": "As etiquetas ideais para a sua loja",
+    "html": "etiquetas-ideais.html",
+    "links_validated": true,
+    "images_validated": true
+  },
+  "segredo-sistema": {
+    "subject": "O segredo para o seu sistema PDV rodar sem travar no caixa",
+    "html": "segredo-sistema.html",
+    "links_validated": true,
+    "images_validated": true
+  }
+}

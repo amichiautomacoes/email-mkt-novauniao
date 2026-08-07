@@ -1,0 +1,17 @@
+resend
+supabase
+python-dotenv
+pydantic
+pydantic-settings
+Jinja2
+beautifulsoup4
+lxml
+tenacity
+typer
+rich
+structlog
+httpx
+email-validator
+psycopg[binary]
+google-cloud-secret-manager
+google-cloud-logging
