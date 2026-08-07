@@ -1,7 +1,7 @@
 from functools import lru_cache
 from pathlib import Path
 
-from pydantic import Field
+from pydantic import Field, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -28,6 +28,25 @@ class Settings(BaseSettings):
 
     templates_raw_dir: Path = Path("templates/raw")
     templates_clean_dir: Path = Path("templates/clean")
+
+    @field_validator(
+        "supabase_url",
+        "supabase_secret_key",
+        "supabase_database_url",
+        "supabase_schema",
+        "resend_api_key",
+        "email_from",
+        "email_reply_to",
+        mode="before",
+    )
+    @classmethod
+    def clean_secret_value(cls, value: object, info) -> object:
+        if not isinstance(value, str):
+            return value
+        first_line = next((line.strip() for line in value.splitlines() if line.strip()), "")
+        if first_line.startswith(f"{info.field_name.upper()}="):
+            first_line = first_line.split("=", 1)[1].strip()
+        return first_line.strip("'\"")
 
 
 @lru_cache
