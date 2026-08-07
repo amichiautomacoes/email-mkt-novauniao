@@ -37,7 +37,7 @@ jobs:
     timeout-minutes: 30
 
     env:
-      PYTHONPATH: src
+      PYTHONPATH: .:src
       SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
       SUPABASE_SECRET_KEY: ${{ secrets.SUPABASE_SECRET_KEY }}
       SUPABASE_DATABASE_URL: ${{ secrets.SUPABASE_DATABASE_URL }}

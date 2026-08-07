@@ -11,6 +11,7 @@ __pycache__/
 
 logs/
 logs_*/
+job-logs*.txt
 tmp/
 dist/
 build/
