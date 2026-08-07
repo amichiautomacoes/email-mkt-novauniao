@@ -83,3 +83,23 @@ numero_envios  contador acumulado de envios aceitos
 ```
 
 Execucoes em `--dry-run` nao gravam nessa tabela.
+
+## GitHub Actions
+
+O workflow `.github/workflows/email-disparos.yml` permite disparos manuais pela aba Actions do GitHub.
+
+Configure estes secrets no repositorio:
+
+```text
+SUPABASE_URL
+SUPABASE_SECRET_KEY
+SUPABASE_DATABASE_URL
+SUPABASE_SCHEMA
+RESEND_API_KEY
+EMAIL_FROM
+EMAIL_REPLY_TO
+EMAIL_BATCH_SIZE
+RESEND_REQUESTS_PER_SECOND
+```
+
+No primeiro teste pelo GitHub, use `dry_run=true`, `campaign=lote1` e `limit=2`.
