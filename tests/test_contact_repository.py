@@ -23,7 +23,7 @@ def test_contact_repository_fetches_contacts_from_supabase(monkeypatch) -> None:
         {"id": "1", "nome": "Hugo", "email": "hugo@example.com"},
         {"id": "2", "nome": "Ana", "email": "ana@example.com"},
     ]
-    assert fake_cursor.final_params == ["lote1", 2]
+    assert fake_cursor.final_params == ["lote1", "lote1", 2]
 
 
 class FakeConnection:
@@ -65,6 +65,9 @@ class FakeCursor:
             ]
             return
         if self.calls == 2:
+            self.one = {"exists": True}
+            return
+        if self.calls == 3:
             self.one = {"exists": True}
             return
         self.final_params = list(params or [])

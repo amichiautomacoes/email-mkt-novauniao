@@ -9,6 +9,7 @@ from email_mkt.contacts.filters import ContactFilters
 
 CONTACTS_TABLE = "email_mkt"
 SUPPRESSIONS_TABLE = "email_suppressions"
+CONTROL_TABLE = "email_controle_envio"
 MANUAL_CAMPAIGNS = {"manual", "all", "todos", "todas"}
 
 
@@ -27,8 +28,16 @@ class ContactRepository:
                 if "email" not in columns:
                     raise RuntimeError(f"Coluna email nao encontrada em {self.settings.supabase_schema}.{CONTACTS_TABLE}.")
 
-                suppressions_schema = _find_suppressions_schema(cur, self.settings.supabase_schema)
-                return _fetch_contacts(cur, self.settings.supabase_schema, columns, suppressions_schema, filters)
+                suppressions_schema = _find_table_schema(cur, self.settings.supabase_schema, SUPPRESSIONS_TABLE)
+                control_schema = _find_table_schema(cur, self.settings.supabase_schema, CONTROL_TABLE)
+                return _fetch_contacts(
+                    cur,
+                    self.settings.supabase_schema,
+                    columns,
+                    suppressions_schema,
+                    control_schema,
+                    filters,
+                )
 
 
 def _get_columns(cur: psycopg.Cursor, schema: str, table: str) -> set[str]:
@@ -44,9 +53,9 @@ def _get_columns(cur: psycopg.Cursor, schema: str, table: str) -> set[str]:
     return {row["column_name"] for row in cur.fetchall()}
 
 
-def _find_suppressions_schema(cur: psycopg.Cursor, preferred_schema: str) -> str | None:
+def _find_table_schema(cur: psycopg.Cursor, preferred_schema: str, table: str) -> str | None:
     for schema in (preferred_schema, "public"):
-        if _table_exists(cur, schema, SUPPRESSIONS_TABLE):
+        if _table_exists(cur, schema, table):
             return schema
     return None
 
@@ -71,6 +80,7 @@ def _fetch_contacts(
     schema: str,
     columns: set[str],
     suppressions_schema: str | None,
+    control_schema: str | None,
     filters: ContactFilters,
 ) -> list[dict]:
     select_columns = [
@@ -102,6 +112,25 @@ def _fetch_contacts(
         )
 
     lote_key = _resolve_lote_key(filters.campaign_key)
+    if control_schema is not None and lote_key is not None:
+        where_clauses.append(
+            sql.SQL(
+                """
+                not exists (
+                  select 1
+                  from {}.{} as control
+                  where lower(control.email) = lower(source.{}::text)
+                    and lower(regexp_replace(control.campanha, '[^a-zA-Z0-9]', '', 'g')) = %s
+                )
+                """
+            ).format(
+                sql.Identifier(control_schema),
+                sql.Identifier(CONTROL_TABLE),
+                sql.Identifier("email"),
+            )
+        )
+        params.append(lote_key)
+
     if lote_key is not None:
         if "lote" not in columns:
             raise RuntimeError(f"Coluna lote nao encontrada em {schema}.{CONTACTS_TABLE}.")

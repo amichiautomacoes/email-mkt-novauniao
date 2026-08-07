@@ -23,6 +23,8 @@ on:
         required: true
         default: true
         type: boolean
+  schedule:
+    - cron: "30 12 10-14 8 *"
 
 concurrency:
   group: email-mkt-disparos
@@ -46,6 +48,8 @@ jobs:
       EMAIL_BATCH_SIZE: ${{ secrets.EMAIL_BATCH_SIZE }}
       RESEND_REQUESTS_PER_SECOND: ${{ secrets.RESEND_REQUESTS_PER_SECOND }}
       DRY_RUN_DEFAULT: "true"
+      EMAIL_SCHEDULE_LIMIT: ${{ vars.EMAIL_SCHEDULE_LIMIT }}
+      EMAIL_SCHEDULE_DRY_RUN: ${{ vars.EMAIL_SCHEDULE_DRY_RUN }}
 
     steps:
       - name: Checkout
@@ -65,10 +69,21 @@ jobs:
       - name: Run tests
         run: pytest
 
-      - name: Send campaign
+      - name: Send manual campaign
+        if: github.event_name == 'workflow_dispatch'
         run: |
           if [ "${{ inputs.dry_run }}" = "true" ]; then
             python -m email_mkt.cli send --campaign "${{ inputs.campaign }}" --limit "${{ inputs.limit }}" --dry-run
           else
             python -m email_mkt.cli send --campaign "${{ inputs.campaign }}" --limit "${{ inputs.limit }}" --no-dry-run
           fi
+
+      - name: Send scheduled campaign
+        if: github.event_name == 'schedule'
+        run: |
+          if [ "${EMAIL_SCHEDULE_DRY_RUN:-false}" = "true" ]; then
+            DRY_RUN_ARG="--dry-run"
+          else
+            DRY_RUN_ARG="--no-dry-run"
+          fi
+          python scripts/run_scheduled_campaign.py --limit "${EMAIL_SCHEDULE_LIMIT:-50}" "$DRY_RUN_ARG"

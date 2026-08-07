@@ -103,3 +103,26 @@ RESEND_REQUESTS_PER_SECOND
 ```
 
 No primeiro teste pelo GitHub, use `dry_run=true`, `campaign=lote1` e `limit=2`.
+
+### Programacao automatica
+
+As campanhas abaixo estao programadas para 09:30 no horario de Sao Paulo:
+
+```text
+2026-08-10 lote1 -> 3formas-melhorar-experiencia
+2026-08-11 lote2 -> etiquetas-ideais
+2026-08-12 lote3 -> segredo-sistema
+2026-08-13 lote4 -> detalhe-loja
+2026-08-14 lote5 -> 3formas-melhorar-experiencia
+```
+
+O cron do GitHub roda em UTC, por isso o workflow usa `30 12 10-14 8 *`. O script `scripts/run_scheduled_campaign.py` confere a data em `America/Sao_Paulo` e ignora qualquer data fora da programacao de 2026.
+
+Variaveis opcionais do repositorio:
+
+```text
+EMAIL_SCHEDULE_LIMIT=50
+EMAIL_SCHEDULE_DRY_RUN=false
+```
+
+Use `EMAIL_SCHEDULE_DRY_RUN=true` se quiser que o automatico simule sem enviar.
