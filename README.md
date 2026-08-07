@@ -91,8 +91,6 @@ O workflow `.github/workflows/email-disparos.yml` permite disparos manuais pela 
 Configure estes secrets no repositorio:
 
 ```text
-SUPABASE_URL
-SUPABASE_SECRET_KEY
 SUPABASE_DATABASE_URL
 SUPABASE_SCHEMA
 RESEND_API_KEY
@@ -126,3 +124,9 @@ EMAIL_SCHEDULE_DRY_RUN=false
 ```
 
 Use `EMAIL_SCHEDULE_DRY_RUN=true` se quiser que o automatico simule sem enviar.
+
+## Proximas tarefas
+
+- Organizar nomes de campanhas e lotes para deixar a operacao mais clara do que `lote1`, `lote2`, etc.
+- Sincronizar os horarios de disparo com uma planilha no Google Sheets/Drive, usando a planilha como fonte de verdade para datas, campanhas, limites e modo dry-run.
+- Criar um formato de execucao em container para EasyPanel, com variaveis de ambiente, comando de start e estrategia de agendamento/cron.
