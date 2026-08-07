@@ -121,7 +121,7 @@ O cron do GitHub roda em UTC, por isso o workflow usa `30 12 10-14 8 *`. O scrip
 Variaveis opcionais do repositorio:
 
 ```text
-EMAIL_SCHEDULE_LIMIT=50
+EMAIL_SCHEDULE_LIMIT=80
 EMAIL_SCHEDULE_DRY_RUN=false
 ```
 

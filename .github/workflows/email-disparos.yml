@@ -86,4 +86,4 @@ jobs:
           else
             DRY_RUN_ARG="--no-dry-run"
           fi
-          python scripts/run_scheduled_campaign.py --limit "${EMAIL_SCHEDULE_LIMIT:-50}" "$DRY_RUN_ARG"
+          python scripts/run_scheduled_campaign.py --limit "${EMAIL_SCHEDULE_LIMIT:-80}" "$DRY_RUN_ARG"

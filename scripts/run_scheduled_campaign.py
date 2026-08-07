@@ -34,7 +34,7 @@ def main() -> None:
     parser.add_argument(
         "--limit",
         type=int,
-        default=int(os.getenv("EMAIL_SCHEDULE_LIMIT", "50")),
+        default=int(os.getenv("EMAIL_SCHEDULE_LIMIT", "80")),
         help="Quantidade maxima de contatos para esta execucao.",
     )
     parser.add_argument("--dry-run", action="store_true", help="Simula sem enviar pela Resend.")
