@@ -1,3 +1,5 @@
+import base64
+import mimetypes
 import re
 from pathlib import Path
 
@@ -23,6 +25,8 @@ def clean_saved_preview_html(source_path: Path, destination_path: Path) -> None:
     _remove_rdstation_web_preview(soup)
     _remove_rdstation_unsubscribe(soup)
     _remove_template_tokens(soup)
+    _replace_name_merge_tags(soup)
+    _inline_relative_images(soup, source_path.parent)
 
     destination_path.parent.mkdir(parents=True, exist_ok=True)
     destination_path.write_text(_to_html_document(soup), encoding="utf-8")
@@ -50,6 +54,8 @@ def personalize_with_contact_name(source_path: Path, destination_path: Path) -> 
     clean_saved_preview_html(source_path, destination_path)
     html = destination_path.read_text(encoding="utf-8")
     soup = BeautifulSoup(html, "lxml")
+    if _has_contact_name_merge_tag(soup):
+        return
     if _replace_name_merge_tags(soup):
         destination_path.write_text(_to_html_document(soup), encoding="utf-8")
         return
@@ -97,7 +103,7 @@ def personalize_with_contact_name(source_path: Path, destination_path: Path) -> 
 
 def _replace_name_merge_tags(soup: BeautifulSoup) -> bool:
     replaced = False
-    merge_tags = ["*|PRIMEIRO_NOME|*", "*|NOME|*"]
+    merge_tags = ["*|PRIMEIRO_NOME|*", "*|NOME|*", "[Primeiro Nome]"]
     for text_node in soup.find_all(string=True):
         cleaned = str(text_node)
         for merge_tag in merge_tags:
@@ -109,6 +115,36 @@ def _replace_name_merge_tags(soup: BeautifulSoup) -> bool:
             text_node.replace_with(cleaned)
             replaced = True
     return replaced
+
+
+def _has_contact_name_merge_tag(soup: BeautifulSoup) -> bool:
+    return any(
+        "{{ contact.nome }}" in str(text_node)
+        for text_node in soup.find_all(string=True)
+    )
+
+
+def _inline_relative_images(soup: BeautifulSoup, base_dir: Path) -> None:
+    for preload in soup.select('link[rel="preload"][as="image"]'):
+        preload.decompose()
+
+    for image in soup.find_all("img", src=True):
+        src = str(image["src"])
+        if _is_remote_or_embedded_src(src):
+            continue
+
+        image_path = (base_dir / src).resolve()
+        if not image_path.exists() or not image_path.is_file():
+            continue
+
+        mime_type = mimetypes.guess_type(image_path.name)[0] or "application/octet-stream"
+        encoded = base64.b64encode(image_path.read_bytes()).decode("ascii")
+        image["src"] = f"data:{mime_type};base64,{encoded}"
+
+
+def _is_remote_or_embedded_src(src: str) -> bool:
+    normalized = src.strip().lower()
+    return normalized.startswith(("http://", "https://", "data:", "cid:"))
 
 
 def _set_style_property(node, property_name: str, value: str) -> None:

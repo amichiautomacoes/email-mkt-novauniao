@@ -11,7 +11,7 @@ class TemplateRenderer:
     def __init__(self, settings: Settings) -> None:
         self.settings = settings
         self.template_dir = self._select_template_dir()
-        self.catalog = TemplateCatalog()
+        self.catalog = TemplateCatalog(self.settings.templates_catalog_path)
         self.env = Environment(
             loader=FileSystemLoader(self.template_dir),
             autoescape=select_autoescape(["html", "xml"]),

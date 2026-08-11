@@ -5,8 +5,9 @@ Pipeline para sincronizar contatos no Supabase, renderizar templates HTML e disp
 ## Estrutura
 
 ```text
-templates/raw/       HTMLs originais
-templates/clean/     HTMLs tratados e prontos para envio
+templates/agosto-2026/catalog.json  catalogo de templates do mes
+templates/agosto-2026/raw/          HTMLs originais
+templates/agosto-2026/clean/        HTMLs tratados e prontos para envio
 src/email_mkt/       codigo da pipeline
 scripts/             utilitarios locais
 sql/                 migracoes e tabelas Supabase

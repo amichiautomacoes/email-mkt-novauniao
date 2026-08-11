@@ -13,7 +13,9 @@ class TemplateMetadata:
 
 
 class TemplateCatalog:
-    def __init__(self, path: Path = Path("templates/catalog.json")) -> None:
+    def __init__(
+        self, path: Path = Path("templates/agosto-2026/catalog.json")
+    ) -> None:
         self.path = path
         self._items = self._load()
 
