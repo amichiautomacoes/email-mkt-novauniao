@@ -1,3 +1,4 @@
+import base64
 import csv
 import json
 import re
@@ -111,9 +112,10 @@ def _auth_headers(settings: Settings, scopes: list[str]) -> dict[str, str]:
     from google.auth.transport.requests import Request
     from google.oauth2 import service_account
 
-    if settings.google_service_account_json.strip():
+    service_account_info = _load_service_account_info(settings)
+    if service_account_info is not None:
         credentials = service_account.Credentials.from_service_account_info(
-            json.loads(settings.google_service_account_json),
+            service_account_info,
             scopes=scopes,
         )
     elif settings.google_service_account_file.exists():
@@ -124,11 +126,22 @@ def _auth_headers(settings: Settings, scopes: list[str]) -> dict[str, str]:
     else:
         raise RuntimeError(
             "Credencial Google nao encontrada. Configure GOOGLE_SERVICE_ACCOUNT_FILE "
-            "ou GOOGLE_SERVICE_ACCOUNT_JSON."
+            "ou GOOGLE_SERVICE_ACCOUNT_JSON_BASE64."
         )
 
     credentials.refresh(Request())
     return {"Authorization": f"Bearer {credentials.token}"}
+
+
+def _load_service_account_info(settings: Settings) -> dict | None:
+    if settings.google_service_account_json_base64.strip():
+        decoded = base64.b64decode(
+            settings.google_service_account_json_base64.strip()
+        ).decode("utf-8")
+        return json.loads(decoded)
+    if settings.google_service_account_json.strip():
+        return json.loads(settings.google_service_account_json)
+    return None
 
 
 def _build_header_map(header: list[str]) -> dict[str, int]:

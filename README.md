@@ -126,6 +126,7 @@ EMAIL_SCHEDULE_SPREADSHEET_NAME=Cronograma Email MKT
 EMAIL_SCHEDULE_SPREADSHEET_ID=
 GOOGLE_SERVICE_ACCOUNT_FILE=mkt-novauniao-d64a259b4a40.json
 GOOGLE_SERVICE_ACCOUNT_JSON=
+GOOGLE_SERVICE_ACCOUNT_JSON_BASE64=
 TZ=America/Sao_Paulo
 ```
 
@@ -222,12 +223,13 @@ EMAIL_SCHEDULE_SPREADSHEET_NAME=Cronograma Email MKT
 EMAIL_SCHEDULE_SPREADSHEET_ID=
 GOOGLE_SERVICE_ACCOUNT_FILE=mkt-novauniao-d64a259b4a40.json
 GOOGLE_SERVICE_ACCOUNT_JSON=
+GOOGLE_SERVICE_ACCOUNT_JSON_BASE64=
 TZ=America/Sao_Paulo
 ```
 
-Em producao, prefira configurar `GOOGLE_SERVICE_ACCOUNT_JSON` como secret com
-o conteudo completo do JSON da service account, ou montar o arquivo indicado por
-`GOOGLE_SERVICE_ACCOUNT_FILE` dentro do container.
+Em producao, prefira configurar `GOOGLE_SERVICE_ACCOUNT_JSON_BASE64` como secret
+com o JSON da service account codificado em Base64, ou montar o arquivo indicado
+por `GOOGLE_SERVICE_ACCOUNT_FILE` dentro do container.
 
 Para o primeiro deploy, mantenha:
 

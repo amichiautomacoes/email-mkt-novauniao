@@ -1,9 +1,13 @@
+import base64
+import json
 from datetime import date, time
 
 import pytest
 
+from email_mkt.config import Settings
 from email_mkt.scheduling.google_drive_csv import (
     ScheduledCampaign,
+    _load_service_account_info,
     parse_schedule_csv,
 )
 from scripts.run_scheduled_campaign import (
@@ -94,3 +98,17 @@ def test_parse_int_env_uses_default_for_empty_values() -> None:
 
 def test_parse_int_env_parses_configured_value() -> None:
     assert parse_int_env("50", default=80) == 50
+
+
+def test_load_service_account_info_accepts_base64_json() -> None:
+    payload = {
+        "type": "service_account",
+        "project_id": "example",
+        "client_email": "service@example.iam.gserviceaccount.com",
+    }
+    encoded = base64.b64encode(json.dumps(payload).encode("utf-8")).decode("ascii")
+
+    assert (
+        _load_service_account_info(Settings(google_service_account_json_base64=encoded))
+        == payload
+    )

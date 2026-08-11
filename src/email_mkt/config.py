@@ -33,6 +33,9 @@ class Settings(BaseSettings):
     google_service_account_json: str = Field(
         default="", alias="GOOGLE_SERVICE_ACCOUNT_JSON"
     )
+    google_service_account_json_base64: str = Field(
+        default="", alias="GOOGLE_SERVICE_ACCOUNT_JSON_BASE64"
+    )
     email_schedule_spreadsheet_id: str = Field(
         default="", alias="EMAIL_SCHEDULE_SPREADSHEET_ID"
     )
