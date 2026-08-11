@@ -27,4 +27,3 @@ class TemplateCatalog:
         if not self.path.exists():
             return {}
         return json.loads(self.path.read_text(encoding="utf-8"))
-

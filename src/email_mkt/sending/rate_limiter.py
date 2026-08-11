@@ -12,4 +12,3 @@ class RateLimiter:
         if remaining > 0:
             time.sleep(remaining)
         self.last_request_at = time.monotonic()
-

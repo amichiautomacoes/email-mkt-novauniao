@@ -24,13 +24,18 @@ class TemplateRenderer:
         html = template.render(contact=contact)
         return EmailMessage(
             to=contact["email"],
-            subject=contact.get("subject") or (metadata.subject if metadata else template_key.replace("-", " ").title()),
+            subject=contact.get("subject")
+            or (
+                metadata.subject if metadata else template_key.replace("-", " ").title()
+            ),
             html=html,
             reply_to=self.settings.email_reply_to or None,
             metadata={"contact_id": contact.get("id"), "template": template_key},
         )
 
     def _select_template_dir(self) -> Path:
-        if self.settings.templates_clean_dir.exists() and any(self.settings.templates_clean_dir.glob("*.html")):
+        if self.settings.templates_clean_dir.exists() and any(
+            self.settings.templates_clean_dir.glob("*.html")
+        ):
             return self.settings.templates_clean_dir
         return self.settings.templates_raw_dir

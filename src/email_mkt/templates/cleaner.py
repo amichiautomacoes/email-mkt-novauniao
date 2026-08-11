@@ -56,7 +56,9 @@ def personalize_with_contact_name(source_path: Path, destination_path: Path) -> 
 
     container_cell = soup.select_one("body > table > tbody > tr > td")
     if container_cell is None:
-        raise RuntimeError(f"Nao foi possivel localizar o container principal em {destination_path}")
+        raise RuntimeError(
+            f"Nao foi possivel localizar o container principal em {destination_path}"
+        )
 
     greeting = BeautifulSoup(
         """
@@ -100,7 +102,9 @@ def _replace_name_merge_tags(soup: BeautifulSoup) -> bool:
         cleaned = str(text_node)
         for merge_tag in merge_tags:
             cleaned = cleaned.replace(merge_tag, "{{ contact.nome }}")
-        cleaned = re.sub(r"(Ol.,\s*\{\{\s*contact\.nome\s*\}\})\s+([!.])", r"\1\2", cleaned)
+        cleaned = re.sub(
+            r"(Ol.,\s*\{\{\s*contact\.nome\s*\}\})\s+([!.])", r"\1\2", cleaned
+        )
         if cleaned != text_node:
             text_node.replace_with(cleaned)
             replaced = True

@@ -4,7 +4,9 @@ from email_mkt.pipeline import PipelineRequest, run_campaign_pipeline
 
 def test_pipeline_dry_run_with_no_contacts() -> None:
     result = run_campaign_pipeline(
-        PipelineRequest(campaign_key="manual", template_key="etiquetas-ideais", dry_run=True),
+        PipelineRequest(
+            campaign_key="manual", template_key="etiquetas-ideais", dry_run=True
+        ),
         Settings(supabase_database_url=""),
     )
 

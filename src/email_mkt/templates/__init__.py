@@ -1,2 +1,1 @@
 """Template rendering and cleanup."""
-

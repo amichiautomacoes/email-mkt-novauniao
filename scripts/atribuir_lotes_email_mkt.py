@@ -5,7 +5,6 @@ import psycopg
 from dotenv import load_dotenv
 from psycopg import sql
 
-
 TABLE_NAME = "email_mkt"
 
 
@@ -27,7 +26,9 @@ def main() -> None:
                 raise RuntimeError(f"Tabela {schema}.{TABLE_NAME} nao encontrada.")
 
             total = get_total(cur, schema)
-            lote_column = next((column for column in columns if column.name == "lote"), None)
+            lote_column = next(
+                (column for column in columns if column.name == "lote"), None
+            )
             if lote_column is None:
                 cur.execute(
                     sql.SQL("alter table {}.{} add column lote text").format(
@@ -97,9 +98,7 @@ def assign_lotes(
     else:
         lote_value = sql.SQL("'lote ' || ranked.lote_num::text")
 
-    cur.execute(
-        sql.SQL(
-            """
+    cur.execute(sql.SQL("""
             with ranked as (
               select
                 ctid,
@@ -110,25 +109,18 @@ def assign_lotes(
             set lote = {lote_value}
             from ranked
             where target.ctid = ranked.ctid
-            """
-        ).format(order_by=order_by, table=table, lote_value=lote_value)
-    )
+            """).format(order_by=order_by, table=table, lote_value=lote_value))
 
 
 def get_summary(cur: psycopg.Cursor, schema: str) -> list[tuple[str, int]]:
-    cur.execute(
-        sql.SQL(
-            """
+    cur.execute(sql.SQL("""
             select lote::text, count(*)
             from {}.{}
             group by lote
             order by lote::text
-            """
-        ).format(sql.Identifier(schema), sql.Identifier(TABLE_NAME))
-    )
+            """).format(sql.Identifier(schema), sql.Identifier(TABLE_NAME)))
     return cur.fetchall()
 
 
 if __name__ == "__main__":
     main()
-

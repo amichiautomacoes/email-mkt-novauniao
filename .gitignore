@@ -8,6 +8,7 @@ __pycache__/
 .env
 .env.*
 !.env.example
+mkt-novauniao-*.json
 
 logs/
 logs_*/

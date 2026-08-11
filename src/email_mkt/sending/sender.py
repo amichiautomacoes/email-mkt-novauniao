@@ -20,7 +20,9 @@ class EmailSender:
     ) -> CampaignRunResult:
         attempted = len(messages)
         if dry_run or not messages:
-            return CampaignRunResult(attempted=attempted, sent=0, failed=0, dry_run=True)
+            return CampaignRunResult(
+                attempted=attempted, sent=0, failed=0, dry_run=True
+            )
 
         client = ResendClient(self.settings)
         campaign_repository = CampaignRepository(self.settings)
@@ -35,7 +37,9 @@ class EmailSender:
                 sent_count = len(data)
                 sent += sent_count
                 if campaign_key:
-                    campaign_repository.record_sent_recipients(campaign_key, batch[:sent_count])
+                    campaign_repository.record_sent_recipients(
+                        campaign_key, batch[:sent_count]
+                    )
             except Exception as exc:  # noqa: BLE001
                 errors.append(str(exc))
 

@@ -84,49 +84,163 @@ numero_envios  contador acumulado de envios aceitos
 
 Execucoes em `--dry-run` nao gravam nessa tabela.
 
-## GitHub Actions
+## Programacao automatica
 
-O workflow `.github/workflows/email-disparos.yml` permite disparos manuais pela aba Actions do GitHub.
+O agendamento automatico usa a planilha Google Sheets `Cronograma Email MKT`
+como fonte de verdade. A service account precisa ter acesso a essa planilha.
 
-Configure estes secrets no repositorio:
-
-```text
-SUPABASE_DATABASE_URL
-SUPABASE_SCHEMA
-RESEND_API_KEY
-EMAIL_FROM
-EMAIL_REPLY_TO
-EMAIL_BATCH_SIZE
-RESEND_REQUESTS_PER_SECOND
-```
-
-No primeiro teste pelo GitHub, use `dry_run=true`, `campaign=lote1` e `limit=2`.
-
-### Programacao automatica
-
-As campanhas abaixo estao programadas para 09:30 no horario de Sao Paulo:
+A primeira aba da planilha deve ter estas colunas:
 
 ```text
-2026-08-10 lote1 -> 3formas-melhorar-experiencia
-2026-08-11 lote2 -> etiquetas-ideais
-2026-08-12 lote3 -> segredo-sistema
-2026-08-13 lote4 -> detalhe-loja
-2026-08-14 lote5 -> 3formas-melhorar-experiencia
+lote | data envio | hora envio | campanha | numero de envios
 ```
 
-O cron do GitHub roda em UTC, por isso o workflow usa `30 12 10-14 8 *`. O script `scripts/run_scheduled_campaign.py` confere a data em `America/Sao_Paulo` e ignora qualquer data fora da programacao de 2026.
+O script tambem aceita os cabecalhos atuais da planilha:
 
-Variaveis opcionais do repositorio:
+```text
+Leads segmentados | Data do Envio | Horario | Campanha | Numeros envios
+```
+
+Cada linha define qual lote de contatos sera buscado no Supabase, qual template
+sera usado como campanha e quantos contatos devem ser selecionados. Exemplo:
+
+```text
+Lote 1 | 12 ago. | 09:30 | 3formas-melhorar-experiencia | 80
+Lote 2 | 13 ago. | 09:30 | campanha etiquetas-ideais | 80
+```
+
+O prefixo `campanha ` e removido automaticamente antes de localizar o template.
+
+O worker do EasyPanel inicia um cron dentro do container com
+`TZ=America/Sao_Paulo`. O script `scripts/run_scheduled_campaign.py` le a
+planilha, confere a data e o horario local e ignora qualquer linha fora do
+momento programado.
+
+Variaveis do worker:
 
 ```text
 EMAIL_SCHEDULE_LIMIT=80
-EMAIL_SCHEDULE_DRY_RUN=false
+EMAIL_SCHEDULE_DRY_RUN=true
+EMAIL_CRON_SCHEDULE=*/5 * * * *
+EMAIL_SCHEDULE_SPREADSHEET_NAME=Cronograma Email MKT
+EMAIL_SCHEDULE_SPREADSHEET_ID=
+GOOGLE_SERVICE_ACCOUNT_FILE=mkt-novauniao-d64a259b4a40.json
+GOOGLE_SERVICE_ACCOUNT_JSON=
+TZ=America/Sao_Paulo
 ```
 
 Use `EMAIL_SCHEDULE_DRY_RUN=true` se quiser que o automatico simule sem enviar.
 
+## Deploy em container no EasyPanel
+
+O projeto pode rodar no EasyPanel usando o repositorio do GitHub como source e o `Dockerfile` deste projeto como builder. Com isso, o EasyPanel faz o build da imagem a partir do GitHub a cada deploy, sem precisar publicar manualmente em um registry.
+
+Crie dois App Services apontando para o mesmo repositorio/branch:
+
+```text
+email-mkt-app      container principal para comandos manuais
+email-mkt-worker   container com cron interno para disparos agendados
+```
+
+### Source e build
+
+Nos dois servicos do EasyPanel:
+
+```text
+Source: GitHub
+Repository: seu-owner/seu-repositorio
+Branch: main
+Build Path: /
+Builder: Dockerfile
+Dockerfile Path: Dockerfile
+```
+
+Se o repositorio for privado, configure o acesso do EasyPanel ao GitHub antes de criar os servicos.
+
+### Servico principal
+
+O comando padrao do `Dockerfile` inicia `scripts/docker/app.sh`. Esse container fica vivo para permitir execucoes manuais pelo console do EasyPanel:
+
+```bash
+python -m email_mkt.cli send --campaign lote1 --limit 10 --dry-run
+python -m email_mkt.cli send --campaign lote1 --limit 50 --no-dry-run
+```
+
+No EasyPanel:
+
+```text
+Service: email-mkt-app
+Source: GitHub
+Builder: Dockerfile
+Command: /app/scripts/docker/app.sh
+```
+
+### Worker com cron
+
+O worker usa o mesmo repositorio e o mesmo `Dockerfile`, mas com outro comando de start:
+
+```text
+Service: email-mkt-worker
+Source: GitHub
+Builder: Dockerfile
+Command: /app/scripts/docker/worker-cron.sh
+```
+
+Por padrao, o cron roda a cada 5 minutos em `America/Sao_Paulo` e o script
+decide se ha campanha para a data/hora atual:
+
+```env
+EMAIL_CRON_SCHEDULE=*/5 * * * *
+TZ=America/Sao_Paulo
+```
+
+O cron chama:
+
+```bash
+python scripts/run_scheduled_campaign.py
+```
+
+O script confere a data e o horario local em Sao Paulo e so executa linhas vencidas na planilha. Fora do horario programado, ele imprime uma mensagem e encerra sem enviar.
+
+### Variaveis de ambiente no EasyPanel
+
+Configure estas variaveis nos dois servicos:
+
+```env
+SUPABASE_DATABASE_URL=
+SUPABASE_SCHEMA=mkt_novauniao
+RESEND_API_KEY=
+EMAIL_FROM=Nova Uniao <contato@seudominio.com.br>
+EMAIL_REPLY_TO=
+EMAIL_BATCH_SIZE=50
+RESEND_REQUESTS_PER_SECOND=1
+DRY_RUN_DEFAULT=true
+EMAIL_SCHEDULE_LIMIT=80
+EMAIL_SCHEDULE_DRY_RUN=true
+EMAIL_CRON_SCHEDULE=*/5 * * * *
+EMAIL_SCHEDULE_SPREADSHEET_NAME=Cronograma Email MKT
+EMAIL_SCHEDULE_SPREADSHEET_ID=
+GOOGLE_SERVICE_ACCOUNT_FILE=mkt-novauniao-d64a259b4a40.json
+GOOGLE_SERVICE_ACCOUNT_JSON=
+TZ=America/Sao_Paulo
+```
+
+Em producao, prefira configurar `GOOGLE_SERVICE_ACCOUNT_JSON` como secret com
+o conteudo completo do JSON da service account, ou montar o arquivo indicado por
+`GOOGLE_SERVICE_ACCOUNT_FILE` dentro do container.
+
+Para o primeiro deploy, mantenha:
+
+```env
+EMAIL_SCHEDULE_DRY_RUN=true
+```
+
+Depois de validar os logs, contatos, templates, opt-out e limites da Resend, habilite envio real no worker:
+
+```env
+EMAIL_SCHEDULE_DRY_RUN=false
+```
+
 ## Proximas tarefas
 
 - Organizar nomes de campanhas e lotes para deixar a operacao mais clara do que `lote1`, `lote2`, etc.
-- Sincronizar os horarios de disparo com uma planilha no Google Sheets/Drive, usando a planilha como fonte de verdade para datas, campanhas, limites e modo dry-run.
-- Criar um formato de execucao em container para EasyPanel, com variaveis de ambiente, comando de start e estrategia de agendamento/cron.

@@ -2,7 +2,6 @@ import re
 
 from email_mkt.campaigns.models import CampaignPlan
 
-
 CAMPAIGN_PLANS = {
     "lote1": CampaignPlan(
         campaign_key="lote1",

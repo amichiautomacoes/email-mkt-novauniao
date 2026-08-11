@@ -32,4 +32,3 @@ class ResendClient:
         if message.reply_to:
             data["reply_to"] = message.reply_to
         return data
-

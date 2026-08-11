@@ -1,2 +1,1 @@
 """Campaign state and persistence."""
-

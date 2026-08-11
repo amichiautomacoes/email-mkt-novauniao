@@ -8,7 +8,10 @@ def test_renderer_uses_catalog_subject_and_contact_name() -> None:
         {"id": "1", "email": "teste@example.com", "nome": "Hugo"},
     )
 
-    assert message.subject == "3 formas de melhorar a experiência do cliente na sua loja através da etiqueta"
+    assert (
+        message.subject
+        == "3 formas de melhorar a experiência do cliente na sua loja através da etiqueta"
+    )
     assert "Olá, Hugo" in message.html
     assert "row-contact-name" not in message.html
 

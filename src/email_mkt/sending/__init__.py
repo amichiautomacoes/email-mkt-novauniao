@@ -1,2 +1,1 @@
 """Resend delivery layer."""
-

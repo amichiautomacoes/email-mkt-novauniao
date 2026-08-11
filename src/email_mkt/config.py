@@ -13,8 +13,6 @@ class Settings(BaseSettings):
         populate_by_name=True,
     )
 
-    supabase_url: str = Field(default="", alias="SUPABASE_URL")
-    supabase_secret_key: str = Field(default="", alias="SUPABASE_SECRET_KEY")
     supabase_database_url: str = Field(default="", alias="SUPABASE_DATABASE_URL")
     supabase_schema: str = Field(default="mkt_novauniao", alias="SUPABASE_SCHEMA")
 
@@ -23,15 +21,29 @@ class Settings(BaseSettings):
     email_reply_to: str = Field(default="", alias="EMAIL_REPLY_TO")
 
     email_batch_size: int = Field(default=100, alias="EMAIL_BATCH_SIZE")
-    resend_requests_per_second: float = Field(default=4.0, alias="RESEND_REQUESTS_PER_SECOND")
+    resend_requests_per_second: float = Field(
+        default=4.0, alias="RESEND_REQUESTS_PER_SECOND"
+    )
     dry_run_default: bool = Field(default=True, alias="DRY_RUN_DEFAULT")
+
+    google_service_account_file: Path = Field(
+        default=Path("mkt-novauniao-d64a259b4a40.json"),
+        alias="GOOGLE_SERVICE_ACCOUNT_FILE",
+    )
+    google_service_account_json: str = Field(
+        default="", alias="GOOGLE_SERVICE_ACCOUNT_JSON"
+    )
+    email_schedule_spreadsheet_id: str = Field(
+        default="", alias="EMAIL_SCHEDULE_SPREADSHEET_ID"
+    )
+    email_schedule_spreadsheet_name: str = Field(
+        default="Cronograma Email MKT", alias="EMAIL_SCHEDULE_SPREADSHEET_NAME"
+    )
 
     templates_raw_dir: Path = Path("templates/raw")
     templates_clean_dir: Path = Path("templates/clean")
 
     @field_validator(
-        "supabase_url",
-        "supabase_secret_key",
         "supabase_database_url",
         "supabase_schema",
         "resend_api_key",
@@ -43,7 +55,9 @@ class Settings(BaseSettings):
     def clean_secret_value(cls, value: object, info) -> object:
         if not isinstance(value, str):
             return value
-        first_line = next((line.strip() for line in value.splitlines() if line.strip()), "")
+        first_line = next(
+            (line.strip() for line in value.splitlines() if line.strip()), ""
+        )
         if first_line.startswith(f"{info.field_name.upper()}="):
             first_line = first_line.split("=", 1)[1].strip()
         return first_line.strip("'\"")

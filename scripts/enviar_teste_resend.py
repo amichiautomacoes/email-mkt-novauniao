@@ -6,10 +6,9 @@ from dotenv import load_dotenv
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 
-from email_mkt.config import get_settings  # noqa: E402
-from email_mkt.sending.resend_client import ResendClient  # noqa: E402
-from email_mkt.templates.renderer import TemplateRenderer  # noqa: E402
-
+from email_mkt.config import get_settings
+from email_mkt.sending.resend_client import ResendClient
+from email_mkt.templates.renderer import TemplateRenderer
 
 TEMPLATES = [
     "3formas-melhorar-experiencia",

@@ -1,3 +1,5 @@
+from typing import Self
+
 from email_mkt.campaigns.models import EmailMessage
 from email_mkt.campaigns.repository import CampaignRepository
 from email_mkt.config import Settings
@@ -15,9 +17,13 @@ def test_record_sent_recipients_skips_without_database_url() -> None:
 def test_record_sent_recipients_upserts_control_table(monkeypatch) -> None:
     fake_cursor = FakeCursor()
     fake_conn = FakeConnection(fake_cursor)
-    monkeypatch.setattr("email_mkt.campaigns.repository.psycopg.connect", lambda _: fake_conn)
+    monkeypatch.setattr(
+        "email_mkt.campaigns.repository.psycopg.connect", lambda _: fake_conn
+    )
 
-    repository = CampaignRepository(Settings(supabase_database_url="postgres://example"))
+    repository = CampaignRepository(
+        Settings(supabase_database_url="postgres://example")
+    )
     repository.record_sent_recipients(
         "lote1",
         [
@@ -38,7 +44,7 @@ class FakeConnection:
         self.cursor_instance = cursor
         self.committed = False
 
-    def __enter__(self) -> "FakeConnection":
+    def __enter__(self) -> Self:
         return self
 
     def __exit__(self, *args) -> None:
@@ -55,7 +61,7 @@ class FakeCursor:
     def __init__(self) -> None:
         self.params = []
 
-    def __enter__(self) -> "FakeCursor":
+    def __enter__(self) -> Self:
         return self
 
     def __exit__(self, *args) -> None:
