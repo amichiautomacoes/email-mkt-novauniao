@@ -46,7 +46,7 @@ def parse_schedule_csv(csv_text: str, reference_date: date) -> list[ScheduledCam
     scheduled: list[ScheduledCampaign] = []
     for row in rows[1:]:
         values = _row_values(row, header_map)
-        if not any(values.values()):
+        if not _has_required_schedule_values(values):
             continue
 
         campaign_key = _normalize_campaign_key(values["campanha"])
@@ -61,6 +61,11 @@ def parse_schedule_csv(csv_text: str, reference_date: date) -> list[ScheduledCam
             )
         )
     return scheduled
+
+
+def _has_required_schedule_values(values: dict[str, str]) -> bool:
+    required_fields = ("lote", "data_envio", "hora_envio", "campanha")
+    return all(values[field].strip() for field in required_fields)
 
 
 def _find_spreadsheet_id(settings: Settings) -> str:
@@ -150,7 +155,12 @@ def _build_header_map(header: list[str]) -> dict[str, int]:
         "data_envio": {"dataenvio", "datadoenvio"},
         "hora_envio": {"horaenvio", "horario", "hora"},
         "campanha": {"campanha"},
-        "numero_envios": {"numeroenvios", "numerosenvios", "limite"},
+        "numero_envios": {
+            "numeroenvios",
+            "numerosenvios",
+            "naomerosenvios",
+            "limite",
+        },
     }
     normalized_header = {
         _normalize_header(cell): index for index, cell in enumerate(header)

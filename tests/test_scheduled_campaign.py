@@ -38,6 +38,20 @@ def test_parse_schedule_csv_maps_google_sheet_columns() -> None:
     ]
 
 
+def test_parse_schedule_csv_ignores_incomplete_rows() -> None:
+    schedule = parse_schedule_csv(
+        (
+            "Leads segmentados,Data do Envio,HorÃ¡rio,Campanha,NÃºmeros envios\n"
+            "Lote 1,12 ago.,09:30,,80\n"
+            "Lote 2,13 ago.,09:30,campanha etiquetas-ideais,80"
+        ),
+        reference_date=date(2026, 8, 11),
+    )
+
+    assert len(schedule) == 1
+    assert schedule[0].lote_key == "lote2"
+
+
 def test_get_scheduled_campaigns_filters_by_date_and_time() -> None:
     schedule = [
         ScheduledCampaign(
