@@ -6,7 +6,11 @@ from email_mkt.scheduling.google_drive_csv import (
     ScheduledCampaign,
     parse_schedule_csv,
 )
-from scripts.run_scheduled_campaign import get_scheduled_campaigns, parse_bool_env
+from scripts.run_scheduled_campaign import (
+    get_scheduled_campaigns,
+    parse_bool_env,
+    parse_int_env,
+)
 
 
 def test_parse_schedule_csv_maps_google_sheet_columns() -> None:
@@ -80,3 +84,13 @@ def test_parse_bool_env_uses_default_for_empty_values() -> None:
 def test_parse_bool_env_rejects_invalid_values() -> None:
     with pytest.raises(ValueError):
         parse_bool_env("maybe", default=True)
+
+
+def test_parse_int_env_uses_default_for_empty_values() -> None:
+    assert parse_int_env(None, default=80) == 80
+    assert parse_int_env("", default=80) == 80
+    assert parse_int_env("  ", default=80) == 80
+
+
+def test_parse_int_env_parses_configured_value() -> None:
+    assert parse_int_env("50", default=80) == 50
