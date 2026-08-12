@@ -22,6 +22,11 @@ class ResendClient:
         response.raise_for_status()
         return response
 
+    def send(self, message: EmailMessage) -> httpx.Response:
+        response = self.client.post("/emails", json=self._serialize_message(message))
+        response.raise_for_status()
+        return response
+
     def _serialize_message(self, message: EmailMessage) -> dict:
         data = {
             "from": self.settings.email_from,
@@ -29,6 +34,8 @@ class ResendClient:
             "subject": message.subject,
             "html": message.html,
         }
+        if message.attachments:
+            data["attachments"] = message.attachments
         if message.reply_to:
             data["reply_to"] = message.reply_to
         return data

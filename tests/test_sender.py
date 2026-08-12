@@ -43,12 +43,59 @@ def test_sender_dry_run_does_not_record_recipients(monkeypatch) -> None:
     assert recorded == []
 
 
+def test_sender_uses_single_send_for_inline_attachments(monkeypatch) -> None:
+    recorded = []
+    FakeResendClient.sent_single = []
+    FakeResendClient.sent_batches = []
+    monkeypatch.setattr(sender, "ResendClient", FakeResendClient)
+    monkeypatch.setattr(
+        sender, "CampaignRepository", lambda settings: FakeCampaignRepository(recorded)
+    )
+
+    message = EmailMessage(
+        to="hugo@example.com",
+        subject="Teste",
+        html='<img src="cid:logo.png">',
+        attachments=[
+            {
+                "filename": "logo.png",
+                "content": "abc",
+                "contentId": "logo.png",
+            }
+        ],
+    )
+    result = EmailSender(
+        Settings(email_batch_size=50, resend_requests_per_second=100)
+    ).send_batch([message], dry_run=False, campaign_key="lote1")
+
+    assert result.sent == 1
+    assert FakeResendClient.sent_single == [message]
+    assert FakeResendClient.sent_batches == []
+    assert recorded == [("lote1", [message])]
+
+
 class FakeResendClient:
+    sent_single = []
+    sent_batches = []
+
     def __init__(self, settings) -> None:
         self.settings = settings
 
+    def send(self, message):
+        self.sent_single.append(message)
+        return FakeSingleResponse(message)
+
     def send_batch(self, messages):
+        self.sent_batches.append(messages)
         return FakeResponse(messages)
+
+
+class FakeSingleResponse:
+    def __init__(self, message) -> None:
+        self.message = message
+
+    def json(self):
+        return {"id": "single-id"}
 
 
 class FakeResponse:

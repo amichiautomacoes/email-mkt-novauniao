@@ -7,7 +7,7 @@ from dotenv import load_dotenv
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 
 from email_mkt.config import get_settings
-from email_mkt.sending.resend_client import ResendClient
+from email_mkt.sending.sender import EmailSender
 from email_mkt.templates.renderer import TemplateRenderer
 
 TEMPLATES = [
@@ -34,12 +34,9 @@ def main(recipient: str, nome: str = "Hugo") -> None:
         )
         for template_key in TEMPLATES
     ]
-    client = ResendClient(settings)
-    payload = [client._serialize_message(message) for message in messages]
-    response = client.client.post("/emails/batch", json=payload)
-    typer.echo(f"status_code={response.status_code}")
-    typer.echo(response.text)
-    if response.is_error:
+    result = EmailSender(settings).send_batch(messages, dry_run=False)
+    typer.echo(result)
+    if result.errors:
         raise typer.Exit(code=1)
 
 

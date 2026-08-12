@@ -1,5 +1,3 @@
-import base64
-import mimetypes
 import re
 from pathlib import Path
 
@@ -26,7 +24,8 @@ def clean_saved_preview_html(source_path: Path, destination_path: Path) -> None:
     _remove_rdstation_unsubscribe(soup)
     _remove_template_tokens(soup)
     _replace_name_merge_tags(soup)
-    _inline_relative_images(soup, source_path.parent)
+    _rewrite_relative_images_to_cid(soup)
+    _polish_canva_layout(soup)
 
     destination_path.parent.mkdir(parents=True, exist_ok=True)
     destination_path.write_text(_to_html_document(soup), encoding="utf-8")
@@ -124,7 +123,7 @@ def _has_contact_name_merge_tag(soup: BeautifulSoup) -> bool:
     )
 
 
-def _inline_relative_images(soup: BeautifulSoup, base_dir: Path) -> None:
+def _rewrite_relative_images_to_cid(soup: BeautifulSoup) -> None:
     for preload in soup.select('link[rel="preload"][as="image"]'):
         preload.decompose()
 
@@ -132,19 +131,43 @@ def _inline_relative_images(soup: BeautifulSoup, base_dir: Path) -> None:
         src = str(image["src"])
         if _is_remote_or_embedded_src(src):
             continue
-
-        image_path = (base_dir / src).resolve()
-        if not image_path.exists() or not image_path.is_file():
+        if not src.startswith("images/"):
             continue
 
-        mime_type = mimetypes.guess_type(image_path.name)[0] or "application/octet-stream"
-        encoded = base64.b64encode(image_path.read_bytes()).decode("ascii")
-        image["src"] = f"data:{mime_type};base64,{encoded}"
+        image["src"] = f"cid:{Path(src).name}"
 
 
 def _is_remote_or_embedded_src(src: str) -> bool:
     normalized = src.strip().lower()
     return normalized.startswith(("http://", "https://", "data:", "cid:"))
+
+
+def _polish_canva_layout(soup: BeautifulSoup) -> None:
+    if soup.body is not None:
+        _set_style_property(soup.body, "background-color", WHITE_BACKGROUND)
+
+    for table in soup.select('body > table[width="100%"]'):
+        table["bgcolor"] = WHITE_BACKGROUND
+        _set_style_property(table, "background-color", WHITE_BACKGROUND)
+
+    for td in soup.select('body > table[width="100%"] > tbody > tr > td'):
+        _set_style_property(td, "background-color", WHITE_BACKGROUND)
+
+    content_padding = soup.find(
+        lambda tag: tag.name == "td"
+        and tag.get("style")
+        and "padding:24px 0 24px 0" in tag["style"]
+    )
+    if content_padding is not None:
+        content_padding["style"] = content_padding["style"].replace(
+            "padding:24px 0 24px 0",
+            "padding:48px 0 32px 0",
+        )
+
+    for table in soup.select("table.ecw"):
+        style = table.get("style", "")
+        style = re.sub(r"min-height:\s*600px;?", "", style)
+        table["style"] = style
 
 
 def _set_style_property(node, property_name: str, value: str) -> None:

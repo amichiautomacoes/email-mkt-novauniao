@@ -14,6 +14,10 @@ def test_renderer_uses_catalog_subject_and_contact_name() -> None:
     )
     assert "Olá, Hugo" in message.html
     assert "row-contact-name" not in message.html
+    assert "data:image" not in message.html
+    assert 'src="images/' not in message.html
+    assert message.html.count("cid:") == 4
+    assert len(message.attachments) == 4
 
 
 def test_all_clean_templates_are_ready_to_render() -> None:

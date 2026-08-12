@@ -29,7 +29,21 @@ class EmailSender:
         sent = 0
         errors: list[str] = []
 
-        for batch in _chunks(messages, self.settings.email_batch_size):
+        for message in [message for message in messages if message.attachments]:
+            self.rate_limiter.wait()
+            try:
+                response = client.send(message)
+                if response.json().get("id"):
+                    sent += 1
+                    if campaign_key:
+                        campaign_repository.record_sent_recipients(
+                            campaign_key, [message]
+                        )
+            except Exception as exc:  # noqa: BLE001
+                errors.append(str(exc))
+
+        batchable_messages = [message for message in messages if not message.attachments]
+        for batch in _chunks(batchable_messages, self.settings.email_batch_size):
             self.rate_limiter.wait()
             try:
                 response = client.send_batch(batch)

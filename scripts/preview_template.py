@@ -6,9 +6,11 @@ from email_mkt.config import get_settings
 from email_mkt.templates.renderer import TemplateRenderer
 
 
-def main(template: str, email: str = "teste@example.com") -> None:
+def main(template: str, email: str = "teste@example.com", nome: str = "Hugo") -> None:
     renderer = TemplateRenderer(get_settings())
-    message = renderer.render_message(template, {"id": "preview", "email": email})
+    message = renderer.render_message(
+        template, {"id": "preview", "email": email, "nome": nome}
+    )
     output = Path("tmp") / f"preview-{template}.html"
     output.parent.mkdir(exist_ok=True)
     output.write_text(message.html, encoding="utf-8")

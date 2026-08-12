@@ -1,3 +1,5 @@
+import base64
+import re
 from pathlib import Path
 
 from jinja2 import Environment, FileSystemLoader, select_autoescape
@@ -30,6 +32,7 @@ class TemplateRenderer:
             ),
             html=html,
             reply_to=self.settings.email_reply_to or None,
+            attachments=self._inline_attachments(html),
             metadata={"contact_id": contact.get("id"), "template": template_key},
         )
 
@@ -39,3 +42,19 @@ class TemplateRenderer:
         ):
             return self.settings.templates_clean_dir
         return self.settings.templates_raw_dir
+
+    def _inline_attachments(self, html: str) -> list[dict]:
+        attachments = []
+        for filename in sorted(set(re.findall(r"cid:([^\"' >]+)", html))):
+            image_path = self.settings.templates_raw_dir / "images" / filename
+            if not image_path.exists():
+                continue
+            attachments.append(
+                {
+                    "filename": filename,
+                    "content": base64.b64encode(image_path.read_bytes()).decode("ascii"),
+                    "content_type": "image/png",
+                    "contentId": filename,
+                }
+            )
+        return attachments

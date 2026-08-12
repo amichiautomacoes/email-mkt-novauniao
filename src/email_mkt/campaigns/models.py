@@ -14,6 +14,7 @@ class EmailMessage:
     subject: str
     html: str
     reply_to: str | None = None
+    attachments: list[dict] = field(default_factory=list)
     metadata: dict = field(default_factory=dict)
 
 
