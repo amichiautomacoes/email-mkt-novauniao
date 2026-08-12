@@ -9,6 +9,7 @@ from email_mkt.contacts.filters import ContactFilters
 CONTACTS_TABLE = "email_mkt_leads"
 SUPPRESSIONS_TABLE = "email_suppressions"
 CONTROL_TABLE = "email_mkt_envio"
+HISTORY_TABLE = "email_mkt_envio_historico"
 MANUAL_CAMPAIGNS = {"manual", "all", "todos", "todas"}
 
 
@@ -21,11 +22,13 @@ class ContactRepository:
         campaign_key: str,
         limit: int | None = None,
         sent_campaign_key: str | None = None,
+        etapa: int = 1,
     ) -> list[dict]:
         filters = ContactFilters(
             campaign_key=campaign_key,
             limit=limit,
             sent_campaign_key=sent_campaign_key,
+            etapa=etapa,
         )
         if not self.settings.supabase_database_url:
             return []
@@ -45,13 +48,46 @@ class ContactRepository:
             control_schema = _find_table_schema(
                 cur, self.settings.supabase_schema, CONTROL_TABLE
             )
+            history_schema = _find_table_schema(
+                cur, self.settings.supabase_schema, HISTORY_TABLE
+            )
             return _fetch_contacts(
                 cur,
                 self.settings.supabase_schema,
                 columns,
                 suppressions_schema,
                 control_schema,
+                history_schema,
                 filters,
+            )
+
+    def get_lote_etapa_status(self, lote_key: str, etapa: int) -> dict[str, int]:
+        if not self.settings.supabase_database_url:
+            return {"total": 0, "previous": 0, "current": 0}
+
+        with psycopg.connect(self.settings.supabase_database_url) as conn, conn.cursor(
+            row_factory=dict_row
+        ) as cur:
+            columns = _get_columns(cur, self.settings.supabase_schema, CONTACTS_TABLE)
+            if "email" not in columns or "lote" not in columns:
+                raise RuntimeError(
+                    f"Colunas email/lote nao encontradas em {self.settings.supabase_schema}.{CONTACTS_TABLE}."
+                )
+            suppressions_schema = _find_table_schema(
+                cur, self.settings.supabase_schema, SUPPRESSIONS_TABLE
+            )
+            history_schema = _find_table_schema(
+                cur, self.settings.supabase_schema, HISTORY_TABLE
+            )
+            if history_schema is None:
+                return {"total": 0, "previous": 0, "current": 0}
+            return _get_lote_etapa_status(
+                cur,
+                self.settings.supabase_schema,
+                suppressions_schema,
+                history_schema,
+                lote_key,
+                etapa,
             )
 
 
@@ -98,6 +134,7 @@ def _fetch_contacts(
     columns: set[str],
     suppressions_schema: str | None,
     control_schema: str | None,
+    history_schema: str | None,
     filters: ContactFilters,
 ) -> list[dict]:
     select_columns = [
@@ -133,13 +170,68 @@ def _fetch_contacts(
 
     lote_key = _resolve_lote_key(filters.campaign_key)
     sent_campaign_key = _resolve_sent_campaign_key(filters)
+    if history_schema is not None and sent_campaign_key is not None:
+        where_clauses.append(
+            sql.SQL("""
+                not exists (
+                  select 1
+                  from {}.{} as history
+                  where history.email_norm = lower(btrim(source.{}::text))
+                    and history.status = 'accepted'
+                    and lower(regexp_replace(history.template_key, '[^a-zA-Z0-9]', '', 'g')) = %s
+                )
+                """).format(
+                sql.Identifier(history_schema),
+                sql.Identifier(HISTORY_TABLE),
+                sql.Identifier("email"),
+            )
+        )
+        params.append(sent_campaign_key)
+
+    if history_schema is not None and lote_key is not None:
+        where_clauses.append(
+            sql.SQL("""
+                not exists (
+                  select 1
+                  from {}.{} as history
+                  where history.email_norm = lower(btrim(source.{}::text))
+                    and history.lote_key = %s
+                    and history.etapa = %s
+                    and history.status = 'accepted'
+                )
+                """).format(
+                sql.Identifier(history_schema),
+                sql.Identifier(HISTORY_TABLE),
+                sql.Identifier("email"),
+            )
+        )
+        params.extend([lote_key, filters.etapa])
+        if filters.etapa > 1:
+            where_clauses.append(
+                sql.SQL("""
+                    exists (
+                      select 1
+                      from {}.{} as history
+                      where history.email_norm = lower(btrim(source.{}::text))
+                        and history.lote_key = %s
+                        and history.etapa = %s
+                        and history.status = 'accepted'
+                    )
+                    """).format(
+                    sql.Identifier(history_schema),
+                    sql.Identifier(HISTORY_TABLE),
+                    sql.Identifier("email"),
+                )
+            )
+            params.extend([lote_key, filters.etapa - 1])
+
     if control_schema is not None and sent_campaign_key is not None:
         where_clauses.append(
             sql.SQL("""
                 not exists (
                   select 1
                   from {}.{} as control
-                  where lower(control.email) = lower(source.{}::text)
+                  where lower(btrim(control.email)) = lower(btrim(source.{}::text))
                     and lower(regexp_replace(control.campanha, '[^a-zA-Z0-9]', '', 'g')) = %s
                 )
                 """).format(
@@ -163,19 +255,34 @@ def _fetch_contacts(
         params.append(lote_key)
 
     order_by = _order_by(columns)
+    sort_columns = _sort_columns(columns)
     query = sql.SQL("""
-        select {select_columns}
-        from {table} as source
-        where {where_clauses}
-        order by {order_by}
+        with candidates as (
+          select
+            {select_columns},
+            {sort_columns},
+            row_number() over (
+              partition by lower(btrim(source.{}::text))
+              order by {order_by}
+            ) as email_rank
+          from {table} as source
+          where {where_clauses}
+        )
+        select id, nome, email
+        from candidates
+        where email_rank = 1
+        order by {final_order_by}
         """).format(
+        sql.Identifier("email"),
         select_columns=sql.SQL(", ").join(select_columns),
+        sort_columns=sql.SQL(", ").join(sort_columns),
+        final_order_by=_final_order_by(columns),
+        order_by=order_by,
         table=sql.SQL("{}.{}").format(
             sql.Identifier(schema), sql.Identifier(CONTACTS_TABLE)
         ),
         where_clauses=sql.SQL(" and ").join(where_clauses),
-        order_by=order_by,
-    )
+        )
 
     if filters.limit is not None:
         query += sql.SQL(" limit %s")
@@ -183,6 +290,82 @@ def _fetch_contacts(
 
     cur.execute(query, params)
     return [dict(row) for row in cur.fetchall()]
+
+
+def _get_lote_etapa_status(
+    cur: psycopg.Cursor,
+    schema: str,
+    suppressions_schema: str | None,
+    history_schema: str,
+    lote_key: str,
+    etapa: int,
+) -> dict[str, int]:
+    where_clauses = [
+        sql.SQL("source.{} is not null").format(sql.Identifier("email")),
+        sql.SQL("btrim(source.{}::text) <> ''").format(sql.Identifier("email")),
+        sql.SQL(
+            "lower(regexp_replace(source.{}::text, '[^a-zA-Z0-9]', '', 'g')) = %s"
+        ).format(sql.Identifier("lote")),
+    ]
+    params: list[object] = [lote_key]
+
+    if suppressions_schema is not None:
+        where_clauses.append(
+            sql.SQL("""
+                not exists (
+                  select 1
+                  from {}.{} as suppression
+                  where lower(btrim(suppression.email)) = lower(btrim(source.{}::text))
+                )
+                """).format(
+                sql.Identifier(suppressions_schema),
+                sql.Identifier(SUPPRESSIONS_TABLE),
+                sql.Identifier("email"),
+            )
+        )
+
+    query = sql.SQL("""
+        with leads as (
+          select distinct lower(btrim(source.{email_column}::text)) as email_norm
+          from {leads_table} as source
+          where {where_clauses}
+        )
+        select
+          count(*)::int as total,
+          count(*) filter (
+            where exists (
+              select 1
+              from {history_table} as history
+              where history.email_norm = leads.email_norm
+                and history.lote_key = %s
+                and history.etapa = %s
+                and history.status = 'accepted'
+            )
+          )::int as previous,
+          count(*) filter (
+            where exists (
+              select 1
+              from {history_table} as history
+              where history.email_norm = leads.email_norm
+                and history.lote_key = %s
+                and history.etapa = %s
+                and history.status = 'accepted'
+            )
+          )::int as current
+        from leads
+        """).format(
+        email_column=sql.Identifier("email"),
+        leads_table=sql.SQL("{}.{}").format(
+            sql.Identifier(schema), sql.Identifier(CONTACTS_TABLE)
+        ),
+        history_table=sql.SQL("{}.{}").format(
+            sql.Identifier(history_schema), sql.Identifier(HISTORY_TABLE)
+        ),
+        where_clauses=sql.SQL(" and ").join(where_clauses),
+    )
+    params.extend([lote_key, etapa - 1, lote_key, etapa])
+    cur.execute(query, params)
+    return dict(cur.fetchone())
 
 
 def _resolve_lote_key(campaign_key: str) -> str | None:
@@ -225,5 +408,30 @@ def _order_by(columns: set[str]) -> sql.Composable:
         selected = ["email"]
     return sql.SQL(", ").join(
         sql.SQL("source.{} nulls last").format(sql.Identifier(column_name))
+        for column_name in selected
+    )
+
+
+def _sort_columns(columns: set[str]) -> list[sql.Composable]:
+    preferred = ("created_at", "id", "email", "telefone", "nome")
+    selected = [column for column in preferred if column in columns]
+    if "email" not in selected:
+        selected.append("email")
+    return [
+        sql.SQL("source.{} as {}").format(
+            sql.Identifier(column_name),
+            sql.Identifier(f"_sort_{column_name}"),
+        )
+        for column_name in selected
+    ]
+
+
+def _final_order_by(columns: set[str]) -> sql.Composable:
+    preferred = ("created_at", "id", "email", "telefone", "nome")
+    selected = [column for column in preferred if column in columns]
+    if "email" not in selected:
+        selected.append("email")
+    return sql.SQL(", ").join(
+        sql.SQL("{} nulls last").format(sql.Identifier(f"_sort_{column_name}"))
         for column_name in selected
     )

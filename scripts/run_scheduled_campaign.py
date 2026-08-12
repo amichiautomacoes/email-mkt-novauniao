@@ -118,12 +118,14 @@ def main() -> None:
                 lote_key=scheduled_campaign.lote_key,
                 template_key=scheduled_campaign.template_key,
                 limit=scheduled_campaign.limit or args.limit,
+                etapa=scheduled_campaign.etapa,
                 dry_run=args.dry_run,
             ),
             settings,
         )
         print(
             f"{scheduled_campaign.lote_key} -> {scheduled_campaign.campaign_key} "
+            f"etapa {scheduled_campaign.etapa} "
             f"({scheduled_campaign.send_date.isoformat()} "
             f"{scheduled_campaign.send_time.strftime('%H:%M')}): {result}"
         )

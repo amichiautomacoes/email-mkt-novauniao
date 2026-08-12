@@ -85,6 +85,30 @@ numero_envios  contador acumulado de envios aceitos
 
 Execucoes em `--dry-run` nao gravam nessa tabela.
 
+O historico auditavel por etapa fica em `mkt_novauniao.email_mkt_envio_historico`,
+criado pela migracao:
+
+```sql
+sql/004_email_envio_historico.sql
+```
+
+Essa tabela grava uma linha por envio aceito, com `lote_key`, `etapa`,
+`template_key`, `resend_email_id` e `data_envio`. Ela tambem impede duplicidade
+por email/template e por email/lote/etapa.
+
+Antes de liberar uma etapa nova, confira o status do lote:
+
+```powershell
+python -m email_mkt.cli status lote1 --etapa 2
+```
+
+A etapa 2 so e executada quando todos os leads ativos do lote tiverem etapa 1
+registrada no historico. Exemplo de segundo envio:
+
+```powershell
+python -m email_mkt.cli send --campaign lote1 --template etiquetas-ideais --etapa 2 --limit 80 --dry-run
+```
+
 ## Metricas da Resend
 
 Para sincronizar as metricas da Resend para o Supabase, aplique a migracao:
@@ -115,7 +139,7 @@ Para capturar eventos reais de abertura, clique e bounce, rode o
 servico de webhook e cadastre esta URL na Resend:
 
 ```text
-https://targetdados.com/webhooks/resend
+https://emailmkt.targetdados.com/webhooks/resend
 ```
 
 Eventos recomendados:
@@ -140,14 +164,14 @@ Service: email-mkt-webhook
 Source: GitHub
 Builder: Dockerfile
 Command: /app/scripts/docker/webhook.sh
-Domain: targetdados.com
-Port: 8000
+Domain: emailmkt.targetdados.com
+Port: 8001
 ```
 
 O endpoint de saude do servico e:
 
 ```text
-https://targetdados.com/health
+https://emailmkt.targetdados.com/health
 ```
 
 Os eventos recebidos sao validados com os headers `svix-id`, `svix-timestamp` e
@@ -162,7 +186,7 @@ como fonte de verdade. A service account precisa ter acesso a essa planilha.
 A primeira aba da planilha deve ter estas colunas:
 
 ```text
-lote | data envio | hora envio | campanha | numero de envios
+lote | data envio | hora envio | campanha | numero de envios | etapa
 ```
 
 O script tambem aceita os cabecalhos atuais da planilha:
@@ -180,6 +204,7 @@ Lote 2 | 13 ago. | 09:30 | campanha etiquetas-ideais | 80
 ```
 
 O prefixo `campanha ` e removido automaticamente antes de localizar o template.
+A coluna `etapa` e opcional; quando vazia, a pipeline assume `1`.
 
 O worker do EasyPanel inicia um cron dentro do container com
 `TZ=America/Sao_Paulo`. O script `scripts/run_scheduled_campaign.py` le a

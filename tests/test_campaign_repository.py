@@ -30,12 +30,23 @@ def test_record_sent_recipients_upserts_control_table(monkeypatch) -> None:
             EmailMessage(to="hugo@example.com", subject="Teste", html="<p>Teste</p>"),
             EmailMessage(to="ana@example.com", subject="Teste", html="<p>Teste</p>"),
         ],
+        lote_key="lote1",
+        etapa=2,
+        resend_email_ids=["resend-1", "resend-2"],
     )
 
-    assert fake_cursor.params == [
+    assert fake_cursor.executemany_params[0] == [
         ("hugo@example.com", "lote1"),
         ("ana@example.com", "lote1"),
     ]
+    assert fake_cursor.executemany_params[1][0][:6] == (
+        "hugo@example.com",
+        "lote1",
+        2,
+        "lote1",
+        "lote1",
+        "resend-1",
+    )
     assert fake_conn.committed is True
 
 
@@ -59,7 +70,7 @@ class FakeConnection:
 
 class FakeCursor:
     def __init__(self) -> None:
-        self.params = []
+        self.executemany_params = []
 
     def __enter__(self) -> Self:
         return self
@@ -68,4 +79,4 @@ class FakeCursor:
         return None
 
     def executemany(self, query, params) -> None:
-        self.params = list(params)
+        self.executemany_params.append(list(params))

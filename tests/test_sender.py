@@ -24,7 +24,13 @@ def test_sender_records_accepted_recipients(monkeypatch) -> None:
     )
 
     assert result.sent == 2
-    assert recorded == [("lote1", messages)]
+    assert recorded == [
+        (
+            "lote1",
+            messages,
+            {"lote_key": None, "etapa": 1, "resend_email_ids": ["0", "1"]},
+        )
+    ]
 
 
 def test_sender_dry_run_does_not_record_recipients(monkeypatch) -> None:
@@ -71,7 +77,13 @@ def test_sender_uses_single_send_for_inline_attachments(monkeypatch) -> None:
     assert result.sent == 1
     assert FakeResendClient.sent_single == [message]
     assert FakeResendClient.sent_batches == []
-    assert recorded == [("lote1", [message])]
+    assert recorded == [
+        (
+            "lote1",
+            [message],
+            {"lote_key": None, "etapa": 1, "resend_email_ids": ["single-id"]},
+        )
+    ]
 
 
 def test_resend_client_serializes_safe_metadata_tags() -> None:
@@ -130,5 +142,5 @@ class FakeCampaignRepository:
     def __init__(self, recorded) -> None:
         self.recorded = recorded
 
-    def record_sent_recipients(self, campaign_key, messages) -> None:
-        self.recorded.append((campaign_key, messages))
+    def record_sent_recipients(self, campaign_key, messages, **kwargs) -> None:
+        self.recorded.append((campaign_key, messages, kwargs))

@@ -24,6 +24,7 @@ class ScheduledCampaign:
     campaign_key: str
     template_key: str
     limit: int | None = None
+    etapa: int = 1
 
 
 def load_scheduled_campaigns(
@@ -58,6 +59,7 @@ def parse_schedule_csv(csv_text: str, reference_date: date) -> list[ScheduledCam
                 campaign_key=campaign_key,
                 template_key=campaign_key,
                 limit=_parse_limit(values["numero_envios"]),
+                etapa=_parse_etapa(values.get("etapa", "")),
             )
         )
     return scheduled
@@ -161,6 +163,7 @@ def _build_header_map(header: list[str]) -> dict[str, int]:
             "naomerosenvios",
             "limite",
         },
+        "etapa": {"etapa", "envio", "numeroenvio", "ordem"},
     }
     normalized_header = {
         _normalize_header(cell): index for index, cell in enumerate(header)
@@ -177,7 +180,8 @@ def _build_header_map(header: list[str]) -> dict[str, int]:
             None,
         )
         if index is None:
-            missing.append(field_name)
+            if field_name != "etapa":
+                missing.append(field_name)
         else:
             header_map[field_name] = index
 
@@ -293,6 +297,11 @@ def _parse_time(value: str) -> time:
 def _parse_limit(value: str) -> int | None:
     normalized = re.sub(r"[^0-9]", "", value)
     return int(normalized) if normalized else None
+
+
+def _parse_etapa(value: str) -> int:
+    normalized = re.sub(r"[^0-9]", "", value)
+    return int(normalized) if normalized else 1
 
 
 def _strip_accents(value: str) -> str:
