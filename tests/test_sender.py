@@ -74,6 +74,24 @@ def test_sender_uses_single_send_for_inline_attachments(monkeypatch) -> None:
     assert recorded == [("lote1", [message])]
 
 
+def test_resend_client_serializes_safe_metadata_tags() -> None:
+    client = sender.ResendClient(Settings())
+    client.default_tags["campaign"] = "lote 1"
+    payload = client._serialize_message(
+        EmailMessage(
+            to="hugo@example.com",
+            subject="Teste",
+            html="<p>Teste</p>",
+            metadata={"template": "etiquetas-ideais"},
+        )
+    )
+
+    assert payload["tags"] == [
+        {"name": "campaign", "value": "lote-1"},
+        {"name": "template", "value": "etiquetas-ideais"},
+    ]
+
+
 class FakeResendClient:
     sent_single = []
     sent_batches = []

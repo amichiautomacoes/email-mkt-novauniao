@@ -5,7 +5,7 @@ import psycopg
 from dotenv import load_dotenv
 from psycopg import sql
 
-TABLE_NAME = "email_mkt"
+TABLE_NAME = "email_mkt_leads"
 
 
 @dataclass(frozen=True)

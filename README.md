@@ -32,7 +32,7 @@ Por padrao, a pipeline nasce em modo seguro. O envio real so deve ser habilitado
 
 ## Lotes e templates
 
-As campanhas por lote usam a coluna `lote` da tabela `mkt_novauniao.email_mkt` e respeitam o limite informado em `--limit`.
+As campanhas por lote usam a coluna `lote` da tabela `mkt_novauniao.email_mkt_leads` e respeitam o limite informado em `--limit`.
 
 ```text
 lote1 -> 3formas-melhorar-experiencia
@@ -74,7 +74,7 @@ python -m email_mkt.cli send --campaign lote1 --limit 50 --no-dry-run
 
 ## Controle de envio
 
-Os envios reais aceitos pela Resend sao registrados em `mkt_novauniao.email_controle_envio`:
+Os envios reais aceitos pela Resend sao registrados em `mkt_novauniao.email_mkt_envio`:
 
 ```text
 email          chave primaria
@@ -84,6 +84,75 @@ numero_envios  contador acumulado de envios aceitos
 ```
 
 Execucoes em `--dry-run` nao gravam nessa tabela.
+
+## Metricas da Resend
+
+Para sincronizar as metricas da Resend para o Supabase, aplique a migracao:
+
+```sql
+sql/003_resend_metrics.sql
+```
+
+Ela cria esta estrutura em `mkt_novauniao`:
+
+```text
+email_mkt_metricas  snapshots agregados de /emails/metrics
+```
+
+Depois execute:
+
+```powershell
+$env:PYTHONPATH="src"
+python scripts/sync_resend_metrics.py --start-date 2026-08-12
+```
+
+O endpoint `GET /emails/metrics` da Resend esta em beta privada. Se a conta
+ainda nao tiver acesso, o script avisa o status retornado e nao grava snapshot.
+
+### Webhook da Resend
+
+Para capturar eventos reais de abertura, clique e bounce, rode o
+servico de webhook e cadastre esta URL na Resend:
+
+```text
+https://targetdados.com/webhooks/resend
+```
+
+Eventos recomendados:
+
+```text
+email.bounced
+email.clicked
+email.complained
+email.opened
+```
+
+Depois de criar o webhook no painel da Resend, copie o signing secret e configure:
+
+```env
+RESEND_WEBHOOK_SECRET=whsec_xxxxxxxxxx
+```
+
+No EasyPanel, crie um App Service para o receptor:
+
+```text
+Service: email-mkt-webhook
+Source: GitHub
+Builder: Dockerfile
+Command: /app/scripts/docker/webhook.sh
+Domain: targetdados.com
+Port: 8000
+```
+
+O endpoint de saude do servico e:
+
+```text
+https://targetdados.com/health
+```
+
+Os eventos recebidos sao validados com os headers `svix-id`, `svix-timestamp` e
+`svix-signature`, e salvos em `mkt_novauniao.email_mkt_metricas`. O `svix-id`
+tem indice unico para ignorar reentregas duplicadas da Resend.
 
 ## Programacao automatica
 
@@ -137,11 +206,12 @@ Use `EMAIL_SCHEDULE_DRY_RUN=true` se quiser que o automatico simule sem enviar.
 
 O projeto pode rodar no EasyPanel usando o repositorio do GitHub como source e o `Dockerfile` deste projeto como builder. Com isso, o EasyPanel faz o build da imagem a partir do GitHub a cada deploy, sem precisar publicar manualmente em um registry.
 
-Crie dois App Services apontando para o mesmo repositorio/branch:
+Crie tres App Services apontando para o mesmo repositorio/branch:
 
 ```text
 email-mkt-app      container principal para comandos manuais
 email-mkt-worker   container com cron interno para disparos agendados
+email-mkt-webhook  container HTTP para receber eventos da Resend
 ```
 
 ### Source e build
@@ -212,6 +282,7 @@ Configure estas variaveis nos dois servicos:
 SUPABASE_DATABASE_URL=
 SUPABASE_SCHEMA=mkt_novauniao
 RESEND_API_KEY=
+RESEND_WEBHOOK_SECRET=
 EMAIL_FROM=Nova Uniao <contato@seudominio.com.br>
 EMAIL_REPLY_TO=
 EMAIL_BATCH_SIZE=50

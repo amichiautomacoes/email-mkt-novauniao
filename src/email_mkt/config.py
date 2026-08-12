@@ -17,6 +17,7 @@ class Settings(BaseSettings):
     supabase_schema: str = Field(default="mkt_novauniao", alias="SUPABASE_SCHEMA")
 
     resend_api_key: str = Field(default="", alias="RESEND_API_KEY")
+    resend_webhook_secret: str = Field(default="", alias="RESEND_WEBHOOK_SECRET")
     email_from: str = Field(default="", alias="EMAIL_FROM")
     email_reply_to: str = Field(default="", alias="EMAIL_REPLY_TO")
 
@@ -51,6 +52,7 @@ class Settings(BaseSettings):
         "supabase_database_url",
         "supabase_schema",
         "resend_api_key",
+        "resend_webhook_secret",
         "email_from",
         "email_reply_to",
         mode="before",

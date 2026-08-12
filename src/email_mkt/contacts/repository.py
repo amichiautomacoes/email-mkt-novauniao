@@ -6,9 +6,9 @@ from email_mkt.campaigns.plans import normalize_campaign_key, resolve_campaign_p
 from email_mkt.config import Settings
 from email_mkt.contacts.filters import ContactFilters
 
-CONTACTS_TABLE = "email_mkt"
+CONTACTS_TABLE = "email_mkt_leads"
 SUPPRESSIONS_TABLE = "email_suppressions"
-CONTROL_TABLE = "email_controle_envio"
+CONTROL_TABLE = "email_mkt_envio"
 MANUAL_CAMPAIGNS = {"manual", "all", "todos", "todas"}
 
 

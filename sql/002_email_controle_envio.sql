@@ -1,4 +1,4 @@
-create table if not exists mkt_novauniao.email_controle_envio (
+create table if not exists mkt_novauniao.email_mkt_envio (
   email text primary key,
   data_envio timestamptz not null default now(),
   campanha text not null,

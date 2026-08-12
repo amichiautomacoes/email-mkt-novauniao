@@ -4,7 +4,7 @@ from psycopg import sql
 from email_mkt.campaigns.models import EmailMessage
 from email_mkt.config import Settings
 
-CONTROL_TABLE = "email_controle_envio"
+CONTROL_TABLE = "email_mkt_envio"
 
 
 class CampaignRepository:
