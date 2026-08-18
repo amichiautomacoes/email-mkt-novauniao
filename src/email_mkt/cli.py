@@ -18,7 +18,8 @@ def main() -> None:
 @app.command()
 def send(
     template: str | None = typer.Option(None, help="Nome do template sem .html"),
-    campaign: str = typer.Option("manual", help="Identificador da campanha"),
+    campaign: str = typer.Option("manual", help="Identificador da campanha/template"),
+    lote: str | None = typer.Option(None, help="Lote de contatos. Ex: lote1"),
     limit: int | None = typer.Option(
         None, help="Limite de contatos para esta execucao"
     ),
@@ -29,6 +30,7 @@ def send(
     settings = get_settings()
     request = PipelineRequest(
         campaign_key=campaign,
+        lote_key=lote,
         template_key=template,
         limit=limit,
         etapa=etapa,

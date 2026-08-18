@@ -1,3 +1,5 @@
+import pytest
+
 from email_mkt.config import Settings
 from email_mkt import pipeline
 from email_mkt.campaigns.models import CampaignRunResult, EmailMessage
@@ -7,7 +9,9 @@ from email_mkt.pipeline import PipelineRequest, run_campaign_pipeline
 def test_pipeline_dry_run_with_no_contacts() -> None:
     result = run_campaign_pipeline(
         PipelineRequest(
-            campaign_key="manual", template_key="etiquetas-ideais", dry_run=True
+            campaign_key="manual",
+            template_key="3formas-melhorar-experiencia",
+            dry_run=True,
         ),
         Settings(supabase_database_url=""),
     )
@@ -16,19 +20,21 @@ def test_pipeline_dry_run_with_no_contacts() -> None:
     assert result.attempted == 0
 
 
-def test_pipeline_resolves_template_from_lote_campaign() -> None:
+def test_pipeline_rejects_lote_without_campaign_template() -> None:
+    with pytest.raises(ValueError, match="Informe --template"):
+        run_campaign_pipeline(
+            PipelineRequest(campaign_key="Lote 10", dry_run=True),
+            Settings(supabase_database_url=""),
+        )
+
+
+def test_pipeline_uses_campaign_key_as_template_with_explicit_lote() -> None:
     result = run_campaign_pipeline(
-        PipelineRequest(campaign_key="Lote2", dry_run=True),
-        Settings(supabase_database_url=""),
-    )
-
-    assert result.dry_run is True
-    assert result.attempted == 0
-
-
-def test_pipeline_resolves_template_from_lote_10_campaign() -> None:
-    result = run_campaign_pipeline(
-        PipelineRequest(campaign_key="Lote 10", dry_run=True),
+        PipelineRequest(
+            campaign_key="3formas-melhorar-experiencia",
+            lote_key="Lote 10",
+            dry_run=True,
+        ),
         Settings(supabase_database_url=""),
     )
 
@@ -79,7 +85,11 @@ def test_pipeline_uses_template_as_control_campaign_key(monkeypatch) -> None:
     monkeypatch.setattr(pipeline, "EmailSender", FakeEmailSender)
 
     result = run_campaign_pipeline(
-        PipelineRequest(campaign_key="lote1", dry_run=True),
+        PipelineRequest(
+            campaign_key="3formas-melhorar-experiencia",
+            lote_key="lote1",
+            dry_run=True,
+        ),
         Settings(supabase_database_url=""),
     )
 
@@ -112,8 +122,8 @@ def test_pipeline_blocks_next_stage_until_previous_stage_is_complete(
 
     result = run_campaign_pipeline(
         PipelineRequest(
-            campaign_key="lote1",
-            template_key="etiquetas-ideais",
+            campaign_key="3formas-melhorar-experiencia",
+            lote_key="lote1",
             etapa=2,
             dry_run=True,
         ),

@@ -94,13 +94,13 @@ def test_resend_client_serializes_safe_metadata_tags() -> None:
             to="hugo@example.com",
             subject="Teste",
             html="<p>Teste</p>",
-            metadata={"template": "etiquetas-ideais"},
+            metadata={"template": "3formas-melhorar-experiencia"},
         )
     )
 
     assert payload["tags"] == [
         {"name": "campaign", "value": "lote-1"},
-        {"name": "template", "value": "etiquetas-ideais"},
+        {"name": "template", "value": "3formas-melhorar-experiencia"},
     ]
 
 

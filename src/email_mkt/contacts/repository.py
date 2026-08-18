@@ -2,7 +2,12 @@ import psycopg
 from psycopg import sql
 from psycopg.rows import dict_row
 
-from email_mkt.campaigns.plans import normalize_campaign_key, resolve_campaign_plan
+from email_mkt.campaigns.plans import (
+    is_lote_key,
+    is_manual_campaign,
+    normalize_campaign_key,
+    normalize_lote_key,
+)
 from email_mkt.config import Settings
 from email_mkt.contacts.filters import ContactFilters
 
@@ -10,7 +15,6 @@ CONTACTS_TABLE = "email_mkt_leads"
 SUPPRESSIONS_TABLE = "email_suppressions"
 CONTROL_TABLE = "email_mkt_envio"
 HISTORY_TABLE = "email_mkt_envio_historico"
-MANUAL_CAMPAIGNS = {"manual", "all", "todos", "todas"}
 
 
 class ContactRepository:
@@ -282,7 +286,7 @@ def _fetch_contacts(
             sql.Identifier(schema), sql.Identifier(CONTACTS_TABLE)
         ),
         where_clauses=sql.SQL(" and ").join(where_clauses),
-        )
+    )
 
     if filters.limit is not None:
         query += sql.SQL(" limit %s")
@@ -369,20 +373,14 @@ def _get_lote_etapa_status(
 
 
 def _resolve_lote_key(campaign_key: str) -> str | None:
-    if campaign_key.lower() in MANUAL_CAMPAIGNS:
+    if is_manual_campaign(campaign_key):
         return None
-    plan = resolve_campaign_plan(campaign_key)
-    if plan is not None:
-        return plan.lote_key
-    normalized = normalize_campaign_key(campaign_key)
-    if normalized.startswith("lote"):
-        return normalized
-    return None
+    return normalize_lote_key(campaign_key) if is_lote_key(campaign_key) else None
 
 
 def _resolve_sent_campaign_key(filters: ContactFilters) -> str | None:
     campaign_key = filters.sent_campaign_key or filters.campaign_key
-    if campaign_key.lower() in MANUAL_CAMPAIGNS:
+    if is_manual_campaign(campaign_key):
         return None
     return normalize_campaign_key(campaign_key)
 

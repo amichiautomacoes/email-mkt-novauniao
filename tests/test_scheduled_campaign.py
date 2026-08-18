@@ -21,7 +21,7 @@ def test_parse_schedule_csv_maps_google_sheet_columns() -> None:
     schedule = parse_schedule_csv(
         (
             "Leads segmentados,Data do Envio,Horário,Campanha,Números envios\n"
-            "Lote 2,13 ago.,09:30,campanha etiquetas-ideais,80"
+            "Lote 2,13 ago.,09:30,campanha 3formas-melhorar-experiencia,80"
         ),
         reference_date=date(2026, 8, 11),
     )
@@ -31,8 +31,8 @@ def test_parse_schedule_csv_maps_google_sheet_columns() -> None:
             lote_key="lote2",
             send_date=date(2026, 8, 13),
             send_time=time(9, 30),
-            campaign_key="etiquetas-ideais",
-            template_key="etiquetas-ideais",
+            campaign_key="3formas-melhorar-experiencia",
+            template_key="3formas-melhorar-experiencia",
             limit=80,
         )
     ]
@@ -43,7 +43,7 @@ def test_parse_schedule_csv_ignores_incomplete_rows() -> None:
         (
             "Leads segmentados,Data do Envio,HorÃ¡rio,Campanha,NÃºmeros envios\n"
             "Lote 1,12 ago.,09:30,,80\n"
-            "Lote 2,13 ago.,09:30,campanha etiquetas-ideais,80"
+            "Lote 2,13 ago.,09:30,campanha 3formas-melhorar-experiencia,80"
         ),
         reference_date=date(2026, 8, 11),
     )

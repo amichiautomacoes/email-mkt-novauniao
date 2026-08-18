@@ -23,9 +23,6 @@ def test_renderer_uses_catalog_subject_and_contact_name() -> None:
 def test_all_clean_templates_are_ready_to_render() -> None:
     expected_subjects = {
         "3formas-melhorar-experiencia": "3 formas de melhorar a experiência do cliente na sua loja através da etiqueta",
-        "detalhe-loja": "Um detalhe que sua loja não pode esquecer",
-        "etiquetas-ideais": "As etiquetas ideais para a sua loja",
-        "segredo-sistema": "O segredo para o seu sistema PDV rodar sem travar no caixa",
     }
     renderer = TemplateRenderer(Settings())
 

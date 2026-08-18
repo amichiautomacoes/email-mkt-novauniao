@@ -2,13 +2,6 @@ from dataclasses import dataclass, field
 
 
 @dataclass(frozen=True)
-class CampaignPlan:
-    campaign_key: str
-    lote_key: str
-    template_key: str
-
-
-@dataclass(frozen=True)
 class EmailMessage:
     to: str
     subject: str

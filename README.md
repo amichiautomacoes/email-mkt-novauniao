@@ -25,32 +25,29 @@ $env:PYTHONPATH="src"
 ## Primeiro comando
 
 ```powershell
-python -m email_mkt.cli send --campaign lote2 --limit 10 --dry-run
+python -m email_mkt.cli send --campaign 3formas-melhorar-experiencia --lote lote2 --limit 10 --dry-run
 ```
 
 Por padrao, a pipeline nasce em modo seguro. O envio real so deve ser habilitado depois de validar contatos, templates, opt-out e limites do Resend.
 
-## Lotes e templates
+## Campanhas e lotes
 
-As campanhas por lote usam a coluna `lote` da tabela `mkt_novauniao.email_mkt_leads` e respeitam o limite informado em `--limit`.
+As campanhas disponiveis sao criadas no catalogo de templates do projeto. Os
+lotes sao apenas segmentos na coluna `lote` da tabela
+`mkt_novauniao.email_mkt_leads`; eles nao apontam para campanhas no codigo.
 
 ```text
-lote1  -> 3formas-melhorar-experiencia
-lote2  -> 3formas-melhorar-experiencia
-lote3  -> 3formas-melhorar-experiencia
-lote4  -> 3formas-melhorar-experiencia
-lote5  -> 3formas-melhorar-experiencia
-lote6  -> 3formas-melhorar-experiencia
-lote7  -> 3formas-melhorar-experiencia
-lote8  -> 3formas-melhorar-experiencia
-lote9  -> 3formas-melhorar-experiencia
-lote10 -> 3formas-melhorar-experiencia
+campanha disponivel:
+3formas-melhorar-experiencia
 ```
+
+No envio automatico, a planilha define qual campanha sera usada em cada lote.
+No envio manual, informe a campanha e o lote explicitamente.
 
 Exemplo:
 
 ```powershell
-python -m email_mkt.cli send --campaign lote1 --limit 50 --dry-run
+python -m email_mkt.cli send --campaign 3formas-melhorar-experiencia --lote lote1 --limit 50 --dry-run
 ```
 
 ## Limites de envio
@@ -74,7 +71,7 @@ DRY_RUN_DEFAULT=false
 Ou execute uma campanha explicitamente com:
 
 ```powershell
-python -m email_mkt.cli send --campaign lote1 --limit 50 --no-dry-run
+python -m email_mkt.cli send --campaign 3formas-melhorar-experiencia --lote lote1 --limit 50 --no-dry-run
 ```
 
 ## Controle de envio
@@ -111,7 +108,7 @@ A etapa 2 so e executada quando todos os leads ativos do lote tiverem etapa 1
 registrada no historico. Exemplo de segundo envio:
 
 ```powershell
-python -m email_mkt.cli send --campaign lote1 --template etiquetas-ideais --etapa 2 --limit 80 --dry-run
+python -m email_mkt.cli send --campaign 3formas-melhorar-experiencia --lote lote1 --etapa 2 --limit 80 --dry-run
 ```
 
 ## Metricas da Resend
@@ -205,7 +202,7 @@ sera usado como campanha e quantos contatos devem ser selecionados. Exemplo:
 
 ```text
 Lote 1 | 12 ago. | 09:30 | 3formas-melhorar-experiencia | 80
-Lote 2 | 13 ago. | 09:30 | campanha etiquetas-ideais | 80
+Lote 2 | 13 ago. | 09:30 | campanha 3formas-melhorar-experiencia | 80
 ```
 
 O prefixo `campanha ` e removido automaticamente antes de localizar o template.
@@ -266,8 +263,8 @@ Se o repositorio for privado, configure o acesso do EasyPanel ao GitHub antes de
 O comando padrao do `Dockerfile` inicia `scripts/docker/app.sh`. Esse container fica vivo para permitir execucoes manuais pelo console do EasyPanel:
 
 ```bash
-python -m email_mkt.cli send --campaign lote1 --limit 10 --dry-run
-python -m email_mkt.cli send --campaign lote1 --limit 50 --no-dry-run
+python -m email_mkt.cli send --campaign 3formas-melhorar-experiencia --lote lote1 --limit 10 --dry-run
+python -m email_mkt.cli send --campaign 3formas-melhorar-experiencia --lote lote1 --limit 50 --no-dry-run
 ```
 
 No EasyPanel:

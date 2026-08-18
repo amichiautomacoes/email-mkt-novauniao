@@ -2,7 +2,11 @@ from dataclasses import dataclass
 import psycopg
 
 from email_mkt.campaigns.models import CampaignRunResult
-from email_mkt.campaigns.plans import normalize_campaign_key, resolve_campaign_plan
+from email_mkt.campaigns.plans import (
+    is_lote_key,
+    is_manual_campaign,
+    normalize_lote_key,
+)
 from email_mkt.config import Settings
 from email_mkt.contacts.repository import ContactRepository
 from email_mkt.sending.sender import EmailSender
@@ -24,7 +28,7 @@ def run_campaign_pipeline(
 ) -> CampaignRunResult:
     template_key = _resolve_template_key(request)
     control_campaign_key = template_key
-    lote_key = request.lote_key or _resolve_lote_key(request)
+    lote_key = _resolve_lote_key(request)
 
     with _CampaignLock(settings, control_campaign_key, request.dry_run) as locked:
         if not locked:
@@ -33,16 +37,12 @@ def run_campaign_pipeline(
                 sent=0,
                 failed=0,
                 dry_run=request.dry_run,
-                errors=[
-                    f"Campanha {control_campaign_key!r} ja esta em execucao."
-                ],
+                errors=[f"Campanha {control_campaign_key!r} ja esta em execucao."],
             )
 
         contact_repository = ContactRepository(settings)
         if request.etapa > 1 and lote_key:
-            status = contact_repository.get_lote_etapa_status(
-                lote_key, request.etapa
-            )
+            status = contact_repository.get_lote_etapa_status(lote_key, request.etapa)
             if status["total"] == 0 or status["previous"] < status["total"]:
                 return CampaignRunResult(
                     attempted=0,
@@ -83,20 +83,21 @@ def run_campaign_pipeline(
 def _resolve_template_key(request: PipelineRequest) -> str:
     if request.template_key:
         return request.template_key
-    plan = resolve_campaign_plan(request.lote_key or request.campaign_key)
-    if plan is not None:
-        return plan.template_key
-    raise ValueError("Informe --template para campanhas sem lote mapeado.")
+    if not is_manual_campaign(request.campaign_key) and not is_lote_key(
+        request.campaign_key
+    ):
+        return request.campaign_key
+    raise ValueError(
+        "Informe --template ou use --campaign com a chave da campanha e --lote com o lote."
+    )
 
 
 def _resolve_lote_key(request: PipelineRequest) -> str | None:
     if request.lote_key:
-        return request.lote_key
-    plan = resolve_campaign_plan(request.campaign_key)
-    if plan is not None:
-        return plan.lote_key
-    normalized = normalize_campaign_key(request.campaign_key)
-    return normalized if normalized.startswith("lote") else None
+        return normalize_lote_key(request.lote_key)
+    if is_lote_key(request.campaign_key):
+        return normalize_lote_key(request.campaign_key)
+    return None
 
 
 class _CampaignLock:

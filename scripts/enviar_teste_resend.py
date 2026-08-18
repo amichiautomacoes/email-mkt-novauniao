@@ -12,9 +12,6 @@ from email_mkt.templates.renderer import TemplateRenderer
 
 TEMPLATES = [
     "3formas-melhorar-experiencia",
-    "detalhe-loja",
-    "etiquetas-ideais",
-    "segredo-sistema",
 ]
 
 
