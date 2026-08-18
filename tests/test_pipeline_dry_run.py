@@ -26,6 +26,16 @@ def test_pipeline_resolves_template_from_lote_campaign() -> None:
     assert result.attempted == 0
 
 
+def test_pipeline_resolves_template_from_lote_10_campaign() -> None:
+    result = run_campaign_pipeline(
+        PipelineRequest(campaign_key="Lote 10", dry_run=True),
+        Settings(supabase_database_url=""),
+    )
+
+    assert result.dry_run is True
+    assert result.attempted == 0
+
+
 def test_pipeline_uses_template_as_control_campaign_key(monkeypatch) -> None:
     calls = {}
 

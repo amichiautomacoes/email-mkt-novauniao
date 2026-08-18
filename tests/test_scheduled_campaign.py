@@ -52,6 +52,40 @@ def test_parse_schedule_csv_ignores_incomplete_rows() -> None:
     assert schedule[0].lote_key == "lote2"
 
 
+def test_parse_schedule_csv_accepts_documented_numero_de_envios_header() -> None:
+    schedule = parse_schedule_csv(
+        (
+            "lote,data envio,hora envio,campanha,numero de envios,etapa\n"
+            "Lote 10,18 ago.,09:30,campanha 3formas-melhorar-experiencia,590,1"
+        ),
+        reference_date=date(2026, 8, 18),
+    )
+
+    assert schedule == [
+        ScheduledCampaign(
+            lote_key="lote10",
+            send_date=date(2026, 8, 18),
+            send_time=time(9, 30),
+            campaign_key="3formas-melhorar-experiencia",
+            template_key="3formas-melhorar-experiencia",
+            limit=590,
+        )
+    ]
+
+
+def test_parse_schedule_csv_ignores_lote_inventory_without_schedule() -> None:
+    schedule = parse_schedule_csv(
+        (
+            "Leads segmentados,Data do Envio,Horario,Campanha,Numeros envios,Etapa\n"
+            "Lote 1,,,,,\n"
+            "Lote 10,,,,,"
+        ),
+        reference_date=date(2026, 8, 18),
+    )
+
+    assert schedule == []
+
+
 def test_get_scheduled_campaigns_filters_by_date_and_time() -> None:
     schedule = [
         ScheduledCampaign(

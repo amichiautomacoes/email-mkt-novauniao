@@ -35,11 +35,16 @@ Por padrao, a pipeline nasce em modo seguro. O envio real so deve ser habilitado
 As campanhas por lote usam a coluna `lote` da tabela `mkt_novauniao.email_mkt_leads` e respeitam o limite informado em `--limit`.
 
 ```text
-lote1 -> 3formas-melhorar-experiencia
-lote2 -> etiquetas-ideais
-lote3 -> segredo-sistema
-lote4 -> detalhe-loja
-lote5 -> 3formas-melhorar-experiencia
+lote1  -> 3formas-melhorar-experiencia
+lote2  -> 3formas-melhorar-experiencia
+lote3  -> 3formas-melhorar-experiencia
+lote4  -> 3formas-melhorar-experiencia
+lote5  -> 3formas-melhorar-experiencia
+lote6  -> 3formas-melhorar-experiencia
+lote7  -> 3formas-melhorar-experiencia
+lote8  -> 3formas-melhorar-experiencia
+lote9  -> 3formas-melhorar-experiencia
+lote10 -> 3formas-melhorar-experiencia
 ```
 
 Exemplo:
@@ -205,6 +210,8 @@ Lote 2 | 13 ago. | 09:30 | campanha etiquetas-ideais | 80
 
 O prefixo `campanha ` e removido automaticamente antes de localizar o template.
 A coluna `etapa` e opcional; quando vazia, a pipeline assume `1`.
+Linhas que tenham apenas o lote preenchido funcionam como cadastro visual e sao
+ignoradas pelo worker, pois nao possuem data, horario e campanha.
 
 O worker do EasyPanel inicia um cron dentro do container com
 `TZ=America/Sao_Paulo`. O script `scripts/run_scheduled_campaign.py` le a
@@ -342,4 +349,4 @@ EMAIL_SCHEDULE_DRY_RUN=false
 
 ## Proximas tarefas
 
-- Organizar nomes de campanhas e lotes para deixar a operacao mais clara do que `lote1`, `lote2`, etc.
+- Definir as proximas datas, horarios, campanhas e limites de envio na planilha.

@@ -158,6 +158,8 @@ def _build_header_map(header: list[str]) -> dict[str, int]:
         "hora_envio": {"horaenvio", "horario", "hora"},
         "campanha": {"campanha"},
         "numero_envios": {
+            "numerodeenvios",
+            "numerosdeenvios",
             "numeroenvios",
             "numerosenvios",
             "naomerosenvios",
