@@ -36,6 +36,19 @@ def test_parse_schedule_csv_maps_google_sheet_columns_without_limit() -> None:
     ]
 
 
+def test_parse_schedule_csv_normalizes_accented_campaign_key_for_catalog_alias() -> None:
+    schedule = parse_schedule_csv(
+        (
+            "Leads segmentados,Data do Envio,Horario,Campanha\n"
+            "Lote 1,20/08/2026,08:00,4dicasinfalíveis"
+        ),
+        reference_date=date(2026, 8, 20),
+    )
+
+    assert schedule[0].campaign_key == "4dicasinfaliveis"
+    assert schedule[0].template_key == "4dicasinfaliveis"
+
+
 def test_parse_schedule_csv_ignores_incomplete_rows() -> None:
     schedule = parse_schedule_csv(
         (

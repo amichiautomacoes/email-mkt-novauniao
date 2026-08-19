@@ -59,7 +59,10 @@ def parse_run_time(value: str | None) -> time:
 
 
 def main() -> None:
-    dry_run_default = parse_bool_env(os.getenv("EMAIL_SCHEDULE_DRY_RUN"), True)
+    settings = get_settings()
+    dry_run_default = parse_bool_env(
+        os.getenv("EMAIL_SCHEDULE_DRY_RUN"), settings.dry_run_default
+    )
 
     parser = argparse.ArgumentParser()
     parser.add_argument(
@@ -84,7 +87,6 @@ def main() -> None:
     run_date = parse_run_date(args.run_date)
     run_time = parse_run_time(args.run_time)
     match_time = args.run_date is None or args.run_time is not None
-    settings = get_settings()
     schedule = load_scheduled_campaigns(settings, reference_date=run_date)
     scheduled_campaigns = get_scheduled_campaigns(
         schedule,

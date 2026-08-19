@@ -1,7 +1,7 @@
 #!/bin/sh
 set -eu
 
-CRON_SCHEDULE="${EMAIL_CRON_SCHEDULE:-30 9 * * *}"
+CRON_SCHEDULE="${EMAIL_CRON_SCHEDULE:-*/5 * * * *}"
 CRON_ENV_FILE="/tmp/email-mkt-cron.env"
 CRON_FILE="/etc/cron.d/email-mkt"
 
