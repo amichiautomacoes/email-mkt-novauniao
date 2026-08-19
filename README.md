@@ -188,21 +188,22 @@ como fonte de verdade. A service account precisa ter acesso a essa planilha.
 A primeira aba da planilha deve ter estas colunas:
 
 ```text
-lote | data envio | hora envio | campanha | numero de envios | etapa
+lote | data envio | hora envio | campanha | etapa
 ```
 
 O script tambem aceita os cabecalhos atuais da planilha:
 
 ```text
-Leads segmentados | Data do Envio | Horario | Campanha | Numeros envios
+Leads segmentados | Data do Envio | Horario | Campanha | Etapa
 ```
 
 Cada linha define qual lote de contatos sera buscado no Supabase, qual template
-sera usado como campanha e quantos contatos devem ser selecionados. Exemplo:
+sera usado como campanha. O worker envia para todos os leads elegiveis do lote,
+respeitando opt-out, historico de envio e regras de etapa. Exemplo:
 
 ```text
-Lote 1 | 12 ago. | 09:30 | 3formas-melhorar-experiencia | 80
-Lote 2 | 13 ago. | 09:30 | campanha 3formas-melhorar-experiencia | 80
+Lote 1 | 12 ago. | 09:30 | 3formas-melhorar-experiencia | 1
+Lote 2 | 13 ago. | 09:30 | campanha 3formas-melhorar-experiencia | 1
 ```
 
 O prefixo `campanha ` e removido automaticamente antes de localizar o template.
@@ -218,7 +219,6 @@ momento programado.
 Variaveis do worker:
 
 ```text
-EMAIL_SCHEDULE_LIMIT=80
 EMAIL_SCHEDULE_DRY_RUN=true
 EMAIL_CRON_SCHEDULE=*/5 * * * *
 EMAIL_SCHEDULE_SPREADSHEET_NAME=Cronograma Email MKT
@@ -317,7 +317,6 @@ EMAIL_REPLY_TO=
 EMAIL_BATCH_SIZE=50
 RESEND_REQUESTS_PER_SECOND=1
 DRY_RUN_DEFAULT=true
-EMAIL_SCHEDULE_LIMIT=80
 EMAIL_SCHEDULE_DRY_RUN=true
 EMAIL_CRON_SCHEDULE=*/5 * * * *
 EMAIL_SCHEDULE_SPREADSHEET_NAME=Cronograma Email MKT
@@ -346,4 +345,4 @@ EMAIL_SCHEDULE_DRY_RUN=false
 
 ## Proximas tarefas
 
-- Definir as proximas datas, horarios, campanhas e limites de envio na planilha.
+- Definir as proximas datas, horarios, campanhas e etapas na planilha.

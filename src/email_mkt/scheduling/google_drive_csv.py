@@ -23,7 +23,6 @@ class ScheduledCampaign:
     send_time: time
     campaign_key: str
     template_key: str
-    limit: int | None = None
     etapa: int = 1
 
 
@@ -58,7 +57,6 @@ def parse_schedule_csv(csv_text: str, reference_date: date) -> list[ScheduledCam
                 send_time=_parse_time(values["hora_envio"]),
                 campaign_key=campaign_key,
                 template_key=campaign_key,
-                limit=_parse_limit(values["numero_envios"]),
                 etapa=_parse_etapa(values.get("etapa", "")),
             )
         )
@@ -157,14 +155,6 @@ def _build_header_map(header: list[str]) -> dict[str, int]:
         "data_envio": {"dataenvio", "datadoenvio"},
         "hora_envio": {"horaenvio", "horario", "hora"},
         "campanha": {"campanha"},
-        "numero_envios": {
-            "numerodeenvios",
-            "numerosdeenvios",
-            "numeroenvios",
-            "numerosenvios",
-            "naomerosenvios",
-            "limite",
-        },
         "etapa": {"etapa", "envio", "numeroenvio", "ordem"},
     }
     normalized_header = {
@@ -294,11 +284,6 @@ def _parse_time(value: str) -> time:
     if not match:
         raise ValueError(f"Horario invalido no cronograma: {value!r}")
     return time(int(match.group(1)), int(match.group(2)))
-
-
-def _parse_limit(value: str) -> int | None:
-    normalized = re.sub(r"[^0-9]", "", value)
-    return int(normalized) if normalized else None
 
 
 def _parse_etapa(value: str) -> int:

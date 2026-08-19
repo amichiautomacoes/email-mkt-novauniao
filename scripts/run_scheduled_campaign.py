@@ -27,12 +27,6 @@ def parse_bool_env(value: str | None, default: bool) -> bool:
     raise ValueError(f"Valor booleano invalido: {value!r}")
 
 
-def parse_int_env(value: str | None, default: int) -> int:
-    if value is None or value.strip() == "":
-        return default
-    return int(value)
-
-
 def get_scheduled_campaigns(
     schedule: list[ScheduledCampaign],
     run_date: date,
@@ -79,12 +73,6 @@ def main() -> None:
         ),
     )
     parser.add_argument(
-        "--limit",
-        type=int,
-        default=parse_int_env(os.getenv("EMAIL_SCHEDULE_LIMIT"), 80),
-        help="Quantidade maxima de contatos para esta execucao.",
-    )
-    parser.add_argument(
         "--dry-run", action="store_true", help="Simula sem enviar pela Resend."
     )
     parser.add_argument(
@@ -117,7 +105,7 @@ def main() -> None:
                 campaign_key=scheduled_campaign.campaign_key,
                 lote_key=scheduled_campaign.lote_key,
                 template_key=scheduled_campaign.template_key,
-                limit=scheduled_campaign.limit or args.limit,
+                limit=None,
                 etapa=scheduled_campaign.etapa,
                 dry_run=args.dry_run,
             ),

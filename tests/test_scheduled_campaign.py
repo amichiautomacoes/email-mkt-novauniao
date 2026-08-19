@@ -13,15 +13,14 @@ from email_mkt.scheduling.google_drive_csv import (
 from scripts.run_scheduled_campaign import (
     get_scheduled_campaigns,
     parse_bool_env,
-    parse_int_env,
 )
 
 
-def test_parse_schedule_csv_maps_google_sheet_columns() -> None:
+def test_parse_schedule_csv_maps_google_sheet_columns_without_limit() -> None:
     schedule = parse_schedule_csv(
         (
-            "Leads segmentados,Data do Envio,Horário,Campanha,Números envios\n"
-            "Lote 2,13 ago.,09:30,campanha 3formas-melhorar-experiencia,80"
+            "Leads segmentados,Data do Envio,Horario,Campanha\n"
+            "Lote 2,13 ago.,09:30,campanha 3formas-melhorar-experiencia"
         ),
         reference_date=date(2026, 8, 11),
     )
@@ -33,7 +32,6 @@ def test_parse_schedule_csv_maps_google_sheet_columns() -> None:
             send_time=time(9, 30),
             campaign_key="3formas-melhorar-experiencia",
             template_key="3formas-melhorar-experiencia",
-            limit=80,
         )
     ]
 
@@ -41,9 +39,9 @@ def test_parse_schedule_csv_maps_google_sheet_columns() -> None:
 def test_parse_schedule_csv_ignores_incomplete_rows() -> None:
     schedule = parse_schedule_csv(
         (
-            "Leads segmentados,Data do Envio,HorÃ¡rio,Campanha,NÃºmeros envios\n"
-            "Lote 1,12 ago.,09:30,,80\n"
-            "Lote 2,13 ago.,09:30,campanha 3formas-melhorar-experiencia,80"
+            "Leads segmentados,Data do Envio,Horario,Campanha\n"
+            "Lote 1,12 ago.,09:30,\n"
+            "Lote 2,13 ago.,09:30,campanha 3formas-melhorar-experiencia"
         ),
         reference_date=date(2026, 8, 11),
     )
@@ -52,11 +50,11 @@ def test_parse_schedule_csv_ignores_incomplete_rows() -> None:
     assert schedule[0].lote_key == "lote2"
 
 
-def test_parse_schedule_csv_accepts_documented_numero_de_envios_header() -> None:
+def test_parse_schedule_csv_ignores_legacy_numero_de_envios_header() -> None:
     schedule = parse_schedule_csv(
         (
             "lote,data envio,hora envio,campanha,numero de envios,etapa\n"
-            "Lote 10,18 ago.,09:30,campanha 3formas-melhorar-experiencia,590,1"
+            "Lote 10,18 ago.,09:30,campanha 3formas-melhorar-experiencia,590,2"
         ),
         reference_date=date(2026, 8, 18),
     )
@@ -68,7 +66,7 @@ def test_parse_schedule_csv_accepts_documented_numero_de_envios_header() -> None
             send_time=time(9, 30),
             campaign_key="3formas-melhorar-experiencia",
             template_key="3formas-melhorar-experiencia",
-            limit=590,
+            etapa=2,
         )
     ]
 
@@ -76,9 +74,9 @@ def test_parse_schedule_csv_accepts_documented_numero_de_envios_header() -> None
 def test_parse_schedule_csv_ignores_lote_inventory_without_schedule() -> None:
     schedule = parse_schedule_csv(
         (
-            "Leads segmentados,Data do Envio,Horario,Campanha,Numeros envios,Etapa\n"
-            "Lote 1,,,,,\n"
-            "Lote 10,,,,,"
+            "Leads segmentados,Data do Envio,Horario,Campanha,Etapa\n"
+            "Lote 1,,,,\n"
+            "Lote 10,,,,"
         ),
         reference_date=date(2026, 8, 18),
     )
@@ -94,7 +92,6 @@ def test_get_scheduled_campaigns_filters_by_date_and_time() -> None:
             send_time=time(9, 30),
             campaign_key="3formas-melhorar-experiencia",
             template_key="3formas-melhorar-experiencia",
-            limit=80,
         )
     ]
 
@@ -110,7 +107,6 @@ def test_get_scheduled_campaign_ignores_other_dates() -> None:
             send_time=time(9, 30),
             campaign_key="3formas-melhorar-experiencia",
             template_key="3formas-melhorar-experiencia",
-            limit=80,
         )
     ]
 
@@ -136,16 +132,6 @@ def test_parse_bool_env_uses_default_for_empty_values() -> None:
 def test_parse_bool_env_rejects_invalid_values() -> None:
     with pytest.raises(ValueError):
         parse_bool_env("maybe", default=True)
-
-
-def test_parse_int_env_uses_default_for_empty_values() -> None:
-    assert parse_int_env(None, default=80) == 80
-    assert parse_int_env("", default=80) == 80
-    assert parse_int_env("  ", default=80) == 80
-
-
-def test_parse_int_env_parses_configured_value() -> None:
-    assert parse_int_env("50", default=80) == 50
 
 
 def test_load_service_account_info_accepts_base64_json() -> None:
