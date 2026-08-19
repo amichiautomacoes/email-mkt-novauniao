@@ -36,8 +36,8 @@ def test_record_sent_recipients_upserts_control_table(monkeypatch) -> None:
     )
 
     assert fake_cursor.executemany_params[0] == [
-        ("hugo@example.com", "lote1"),
-        ("ana@example.com", "lote1"),
+        ("hugo@example.com", "lote1", "lote1", 2, "lote1"),
+        ("ana@example.com", "lote1", "lote1", 2, "lote1"),
     ]
     assert fake_cursor.executemany_params[1][0][:6] == (
         "hugo@example.com",

@@ -33,7 +33,6 @@ def test_contact_repository_fetches_contacts_from_supabase(monkeypatch) -> None:
     assert fake_cursor.final_params == [
         "3formasmelhorarexperiencia",
         "lote1",
-        1,
         "3formasmelhorarexperiencia",
         "lote1",
         2,

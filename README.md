@@ -92,11 +92,12 @@ criado pela migracao:
 
 ```sql
 sql/004_email_envio_historico.sql
+sql/005_prevent_duplicate_lote_sends.sql
 ```
 
 Essa tabela grava uma linha por envio aceito, com `lote_key`, `etapa`,
 `template_key`, `resend_email_id` e `data_envio`. Ela tambem impede duplicidade
-por email/template e por email/lote/etapa.
+por email/template e por email/lote.
 
 Antes de liberar uma etapa nova, confira o status do lote:
 

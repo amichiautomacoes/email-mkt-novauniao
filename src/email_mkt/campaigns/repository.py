@@ -26,19 +26,39 @@ class CampaignRepository:
             return
 
         control_query = sql.SQL("""
-            insert into {}.{} (email, data_envio, campanha, numero_envios)
-            values (%s, now(), %s, 1)
+            insert into {}.{} (
+              email,
+              data_envio,
+              campanha,
+              numero_envios,
+              lote_key,
+              etapa,
+              template_key
+            )
+            values (%s, now(), %s, 1, %s, %s, %s)
             on conflict (email) do update
             set
               data_envio = excluded.data_envio,
               campanha = excluded.campanha,
-                numero_envios = {}.numero_envios + 1
+              numero_envios = {}.numero_envios + 1,
+              lote_key = excluded.lote_key,
+              etapa = excluded.etapa,
+              template_key = excluded.template_key
             """).format(
             sql.Identifier(self.settings.supabase_schema),
             sql.Identifier(CONTROL_TABLE),
             sql.Identifier(CONTROL_TABLE),
         )
-        control_params = [(message.to, campaign_key) for message in messages]
+        control_params = [
+            (
+                message.to,
+                campaign_key,
+                lote_key,
+                etapa,
+                str(message.metadata.get("template") or campaign_key),
+            )
+            for message in messages
+        ]
 
         history_query = sql.SQL("""
             insert into {}.{} (

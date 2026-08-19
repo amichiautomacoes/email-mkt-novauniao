@@ -89,6 +89,7 @@ def test_sender_uses_single_send_for_inline_attachments(monkeypatch) -> None:
 def test_resend_client_serializes_safe_metadata_tags() -> None:
     client = sender.ResendClient(Settings())
     client.default_tags["campaign"] = "lote 1"
+    client.default_tags["lote"] = "lote 10"
     payload = client._serialize_message(
         EmailMessage(
             to="hugo@example.com",
@@ -100,16 +101,47 @@ def test_resend_client_serializes_safe_metadata_tags() -> None:
 
     assert payload["tags"] == [
         {"name": "campaign", "value": "lote-1"},
+        {"name": "lote", "value": "lote-10"},
         {"name": "template", "value": "3formas-melhorar-experiencia"},
+    ]
+
+
+def test_sender_tags_resend_messages_with_campaign_and_lote(monkeypatch) -> None:
+    recorded = []
+    FakeResendClient.default_tags_by_instance = []
+    monkeypatch.setattr(sender, "ResendClient", FakeResendClient)
+    monkeypatch.setattr(
+        sender, "CampaignRepository", lambda settings: FakeCampaignRepository(recorded)
+    )
+
+    EmailSender(Settings(email_batch_size=50, resend_requests_per_second=100)).send_batch(
+        [
+            EmailMessage(
+                to="hugo@example.com",
+                subject="Teste",
+                html="<p>Teste</p>",
+                metadata={"template": "4dicasinfalíveis"},
+            )
+        ],
+        dry_run=False,
+        campaign_key="4dicasinfalíveis",
+        lote_key="lote10",
+    )
+
+    assert FakeResendClient.default_tags_by_instance == [
+        {"campaign": "4dicasinfalíveis", "lote": "lote10"}
     ]
 
 
 class FakeResendClient:
     sent_single = []
     sent_batches = []
+    default_tags_by_instance = []
 
     def __init__(self, settings) -> None:
         self.settings = settings
+        self.default_tags = {}
+        self.default_tags_by_instance.append(self.default_tags)
 
     def send(self, message):
         self.sent_single.append(message)

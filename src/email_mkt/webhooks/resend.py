@@ -89,7 +89,7 @@ class ResendWebhookRepository:
             return False
 
         data = event.data
-        tags = data.get("tags") if isinstance(data.get("tags"), dict) else {}
+        tags = _tags_by_name(data.get("tags"))
         query = sql.SQL("""
             insert into {}.{} (
               source,
@@ -194,3 +194,24 @@ def _first_recipient(value: object) -> str | None:
     if isinstance(value, str):
         return value
     return None
+
+
+def _tags_by_name(value: object) -> dict[str, str]:
+    if isinstance(value, dict):
+        return {
+            str(name): str(tag_value)
+            for name, tag_value in value.items()
+            if name and tag_value is not None
+        }
+    if not isinstance(value, list):
+        return {}
+
+    tags = {}
+    for item in value:
+        if not isinstance(item, dict):
+            continue
+        name = item.get("name")
+        tag_value = item.get("value")
+        if name and tag_value is not None:
+            tags[str(name)] = str(tag_value)
+    return tags

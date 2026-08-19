@@ -29,6 +29,8 @@ class EmailSender:
         client = ResendClient(self.settings)
         if campaign_key and hasattr(client, "default_tags"):
             client.default_tags["campaign"] = campaign_key
+        if lote_key and hasattr(client, "default_tags"):
+            client.default_tags["lote"] = lote_key
         campaign_repository = CampaignRepository(self.settings)
         sent = 0
         errors: list[str] = []

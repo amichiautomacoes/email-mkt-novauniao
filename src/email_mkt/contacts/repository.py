@@ -200,7 +200,6 @@ def _fetch_contacts(
                   from {}.{} as history
                   where history.email_norm = lower(btrim(source.{}::text))
                     and history.lote_key = %s
-                    and history.etapa = %s
                     and history.status = 'accepted'
                 )
                 """).format(
@@ -209,7 +208,7 @@ def _fetch_contacts(
                 sql.Identifier("email"),
             )
         )
-        params.extend([lote_key, filters.etapa])
+        params.append(lote_key)
         if filters.etapa > 1:
             where_clauses.append(
                 sql.SQL("""

@@ -29,15 +29,16 @@ def run_campaign_pipeline(
     template_key = _resolve_template_key(request)
     control_campaign_key = template_key
     lote_key = _resolve_lote_key(request)
+    lock_key = f"lote:{lote_key}" if lote_key else f"campaign:{control_campaign_key}"
 
-    with _CampaignLock(settings, control_campaign_key, request.dry_run) as locked:
+    with _CampaignLock(settings, lock_key, request.dry_run) as locked:
         if not locked:
             return CampaignRunResult(
                 attempted=0,
                 sent=0,
                 failed=0,
                 dry_run=request.dry_run,
-                errors=[f"Campanha {control_campaign_key!r} ja esta em execucao."],
+                errors=[f"Execucao {lock_key!r} ja esta em andamento."],
             )
 
         contact_repository = ContactRepository(settings)
