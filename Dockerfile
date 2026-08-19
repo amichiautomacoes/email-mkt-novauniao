@@ -16,7 +16,6 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY src ./src
 COPY templates ./templates
 COPY scripts ./scripts
-COPY sql ./sql
 
 ENV PYTHONPATH=/app/src
 
