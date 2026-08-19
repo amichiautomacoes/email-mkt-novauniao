@@ -10,7 +10,6 @@ templates/agosto-2026/raw/          HTMLs originais
 templates/agosto-2026/clean/        HTMLs tratados e prontos para envio
 src/email_mkt/       codigo da pipeline
 scripts/             utilitarios locais
-sql/                 migracoes e tabelas Supabase
 tests/               testes automatizados
 ```
 
@@ -88,11 +87,7 @@ numero_envios  contador acumulado de envios aceitos
 Execucoes em `--dry-run` nao gravam nessa tabela.
 
 O historico auditavel por etapa fica em `mkt_novauniao.email_mkt_envio_historico`,
-criado pela migracao:
-
-```sql
-sql/004_email_envio_historico.sql
-```
+mantido diretamente no Supabase.
 
 Essa tabela grava uma linha por envio aceito, com `lote_key`, `etapa`,
 `template_key`, `resend_email_id` e `data_envio`. Ela tambem impede duplicidade
@@ -113,13 +108,7 @@ python -m email_mkt.cli send --campaign 3formas-melhorar-experiencia --lote lote
 
 ## Metricas da Resend
 
-Para sincronizar as metricas da Resend para o Supabase, aplique a migracao:
-
-```sql
-sql/003_resend_metrics.sql
-```
-
-Ela cria esta estrutura em `mkt_novauniao`:
+A sincronizacao das metricas da Resend usa esta estrutura em `mkt_novauniao`:
 
 ```text
 email_mkt_metricas  snapshots agregados de /emails/metrics
