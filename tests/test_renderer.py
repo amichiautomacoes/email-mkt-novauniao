@@ -1,3 +1,5 @@
+from bs4 import BeautifulSoup
+
 from email_mkt.config import Settings
 from email_mkt.templates.renderer import TemplateRenderer
 
@@ -18,6 +20,12 @@ def test_renderer_uses_catalog_subject_and_contact_name() -> None:
     assert 'src="images/' not in message.html
     assert message.html.count("cid:") == 4
     assert len(message.attachments) == 4
+    assert all("content_id" in attachment for attachment in message.attachments)
+    assert all("contentId" not in attachment for attachment in message.attachments)
+    assert all(
+        attachment["content_disposition"] == "inline"
+        for attachment in message.attachments
+    )
 
 
 def test_all_clean_templates_are_ready_to_render() -> None:
@@ -38,6 +46,11 @@ def test_all_clean_templates_are_ready_to_render() -> None:
         assert message.subject == subject
         assert "Olá, Hugo" in message.html
         assert "{{ contact.nome }}" not in message.html
+        assert "[PRIMEIRO NOME]" not in message.html
+        assert "[Primeiro Nome]" not in message.html
         assert "rdstation" not in message.html.lower()
         assert "unsubscribe_url" not in message.html
         assert "tracking_pixel_url" not in message.html
+        soup = BeautifulSoup(message.html, "lxml")
+        for link in soup.find_all("a", href=True):
+            assert link.get_text("", strip=True) or link.find("img")

@@ -66,7 +66,8 @@ def test_sender_uses_single_send_for_inline_attachments(monkeypatch) -> None:
             {
                 "filename": "logo.png",
                 "content": "abc",
-                "contentId": "logo.png",
+                "content_id": "logo.png",
+                "content_disposition": "inline",
             }
         ],
     )

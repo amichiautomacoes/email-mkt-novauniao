@@ -54,7 +54,8 @@ class TemplateRenderer:
                     "filename": filename,
                     "content": base64.b64encode(image_path.read_bytes()).decode("ascii"),
                     "content_type": "image/png",
-                    "contentId": filename,
+                    "content_id": filename,
+                    "content_disposition": "inline",
                 }
             )
         return attachments

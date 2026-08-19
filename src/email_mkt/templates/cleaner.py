@@ -26,6 +26,7 @@ def clean_saved_preview_html(source_path: Path, destination_path: Path) -> None:
     _replace_name_merge_tags(soup)
     _rewrite_relative_images_to_cid(soup)
     _polish_canva_layout(soup)
+    _repair_empty_table_links(soup)
 
     destination_path.parent.mkdir(parents=True, exist_ok=True)
     destination_path.write_text(_to_html_document(soup), encoding="utf-8")
@@ -102,11 +103,22 @@ def personalize_with_contact_name(source_path: Path, destination_path: Path) -> 
 
 def _replace_name_merge_tags(soup: BeautifulSoup) -> bool:
     replaced = False
-    merge_tags = ["*|PRIMEIRO_NOME|*", "*|NOME|*", "[Primeiro Nome]"]
+    merge_tags = [
+        "*|PRIMEIRO_NOME|*",
+        "*|NOME|*",
+        "[Primeiro Nome]",
+        "[PRIMEIRO NOME]",
+    ]
     for text_node in soup.find_all(string=True):
         cleaned = str(text_node)
         for merge_tag in merge_tags:
             cleaned = cleaned.replace(merge_tag, "{{ contact.nome }}")
+        cleaned = re.sub(
+            r"\bOl[aá],?\s+\{\{\s*contact\.nome\s*\}\}",
+            "Olá, {{ contact.nome }}",
+            cleaned,
+            flags=re.IGNORECASE,
+        )
         cleaned = re.sub(
             r"(Ol.,\s*\{\{\s*contact\.nome\s*\}\})\s+([!.])", r"\1\2", cleaned
         )
@@ -168,6 +180,22 @@ def _polish_canva_layout(soup: BeautifulSoup) -> None:
         style = table.get("style", "")
         style = re.sub(r"min-height:\s*600px;?", "", style)
         table["style"] = style
+
+
+def _repair_empty_table_links(soup: BeautifulSoup) -> None:
+    for link in soup.find_all("a", href=True):
+        if link.get_text("", strip=True) or link.find("img"):
+            continue
+        next_node = link.next_sibling
+        while next_node is not None and not getattr(next_node, "name", None):
+            next_node = next_node.next_sibling
+        if getattr(next_node, "name", None) == "table":
+            for image in next_node.find_all("img"):
+                image_link = soup.new_tag("a")
+                for attr_name, attr_value in link.attrs.items():
+                    image_link[attr_name] = attr_value
+                image.wrap(image_link)
+            link.decompose()
 
 
 def _set_style_property(node, property_name: str, value: str) -> None:
