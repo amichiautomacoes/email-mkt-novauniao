@@ -4,5 +4,23 @@
     "html": "3formas-melhorar-experiencia.html",
     "links_validated": true,
     "images_validated": true
+  },
+  "4dicasinfalíveis": {
+    "subject": "Sua loja já faz isso no estoque? 4 dicas para organizar melhor seu estoque",
+    "html": "4dicasinfalíveis.html",
+    "links_validated": true,
+    "images_validated": true
+  },
+  "desorganizacaoestoqueestaondemenosimagina": {
+    "subject": "O problema do seu estoque pode estar onde você menos imagina",
+    "html": "desorganizacaoestoqueestaondemenosimagina.html",
+    "links_validated": true,
+    "images_validated": true
+  },
+  "economizarcomecapequenosdetalhes": {
+    "subject": "Sua loja pode estar gastando sem perceber e o problema está onde você nem imagina",
+    "html": "economizarcomecapequenosdetalhes.html",
+    "links_validated": true,
+    "images_validated": true
   }
 }

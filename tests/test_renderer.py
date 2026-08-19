@@ -22,6 +22,9 @@ def test_renderer_uses_catalog_subject_and_contact_name() -> None:
 
 def test_all_clean_templates_are_ready_to_render() -> None:
     expected_subjects = {
+        "4dicasinfalíveis": "Sua loja já faz isso no estoque? 4 dicas para organizar melhor seu estoque",
+        "desorganizacaoestoqueestaondemenosimagina": "O problema do seu estoque pode estar onde você menos imagina",
+        "economizarcomecapequenosdetalhes": "Sua loja pode estar gastando sem perceber e o problema está onde você nem imagina",
         "3formas-melhorar-experiencia": "3 formas de melhorar a experiência do cliente na sua loja através da etiqueta",
     }
     renderer = TemplateRenderer(Settings())
