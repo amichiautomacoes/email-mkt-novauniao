@@ -32,7 +32,7 @@ class TemplateRenderer:
             ),
             html=html,
             reply_to=self.settings.email_reply_to or None,
-            attachments=self._inline_attachments(html),
+            attachments=self._inline_attachments(html, template_name, template_key),
             metadata={"contact_id": contact.get("id"), "template": template_key},
         )
 
@@ -43,11 +43,13 @@ class TemplateRenderer:
             return self.settings.templates_clean_dir
         return self.settings.templates_raw_dir
 
-    def _inline_attachments(self, html: str) -> list[dict]:
+    def _inline_attachments(
+        self, html: str, template_name: str, template_key: str
+    ) -> list[dict]:
         attachments = []
         for filename in sorted(set(re.findall(r"cid:([^\"' >]+)", html))):
-            image_path = self.settings.templates_raw_dir / "images" / filename
-            if not image_path.exists():
+            image_path = self._find_inline_image(filename, template_name, template_key)
+            if image_path is None:
                 continue
             attachments.append(
                 {
@@ -59,3 +61,18 @@ class TemplateRenderer:
                 }
             )
         return attachments
+
+    def _find_inline_image(
+        self, filename: str, template_name: str, template_key: str
+    ) -> Path | None:
+        candidate_dirs = [
+            self.settings.templates_raw_dir / Path(template_name).stem / "images",
+            self.settings.templates_raw_dir / template_key / "images",
+            self.settings.templates_raw_dir / "images",
+        ]
+        for candidate_dir in candidate_dirs:
+            image_path = candidate_dir / filename
+            if not image_path.exists():
+                continue
+            return image_path
+        return None
