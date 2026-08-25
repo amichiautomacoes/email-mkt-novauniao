@@ -193,22 +193,6 @@ def _fetch_contacts(
         params.append(sent_campaign_key)
 
     if history_schema is not None and lote_key is not None:
-        where_clauses.append(
-            sql.SQL("""
-                not exists (
-                  select 1
-                  from {}.{} as history
-                  where history.email_norm = lower(btrim(source.{}::text))
-                    and history.lote_key = %s
-                    and history.status = 'accepted'
-                )
-                """).format(
-                sql.Identifier(history_schema),
-                sql.Identifier(HISTORY_TABLE),
-                sql.Identifier("email"),
-            )
-        )
-        params.append(lote_key)
         if filters.etapa > 1:
             where_clauses.append(
                 sql.SQL("""
