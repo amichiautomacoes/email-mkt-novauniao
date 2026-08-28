@@ -91,7 +91,8 @@ mantido diretamente no Supabase.
 
 Essa tabela grava uma linha por envio aceito, com `lote_key`, `etapa`,
 `template_key`, `resend_email_id` e `data_envio`. Ela tambem impede duplicidade
-por email/template e por email/lote.
+exata por email, lote, etapa e template, alem de evitar reenvio do mesmo
+template para o mesmo email.
 
 Antes de liberar uma etapa nova, confira o status do lote:
 
