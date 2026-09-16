@@ -44,9 +44,18 @@ class Settings(BaseSettings):
         default="Cronograma Email MKT", alias="EMAIL_SCHEDULE_SPREADSHEET_NAME"
     )
 
-    templates_catalog_path: Path = Path("templates/agosto-2026/catalog.json")
-    templates_raw_dir: Path = Path("templates/agosto-2026/raw")
-    templates_clean_dir: Path = Path("templates/agosto-2026/clean")
+    templates_catalog_path: Path = Field(
+        default=Path("templates/setembro-2026/catalog.json"),
+        alias="TEMPLATES_CATALOG_PATH",
+    )
+    templates_raw_dir: Path = Field(
+        default=Path("templates/setembro-2026/raw"),
+        alias="TEMPLATES_RAW_DIR",
+    )
+    templates_clean_dir: Path = Field(
+        default=Path("templates/setembro-2026/clean"),
+        alias="TEMPLATES_CLEAN_DIR",
+    )
 
     @field_validator(
         "supabase_database_url",

@@ -1,0 +1,50 @@
+{
+  "3dicasdiminuirdesperdicio": {
+    "subject": "Você pode estar gastando mais etiquetas do que deveria",
+    "html": "3dicasdiminuirdesperdicio.html",
+    "links_validated": true,
+    "images_validated": true
+  },
+  "4Pontosevitarfalhanaleitura": {
+    "subject": "Seu código de barras está difícil de ler?",
+    "html": "4Pontosevitarfalhanaleitura.html",
+    "links_validated": true,
+    "images_validated": true
+  },
+  "4pontosevitarfalhanaleitura": {
+    "subject": "Seu código de barras está difícil de ler?",
+    "html": "4Pontosevitarfalhanaleitura.html",
+    "links_validated": true,
+    "images_validated": true
+  },
+  "O problema do seu estoque pode começar aqui": {
+    "subject": "O problema do seu estoque pode começar aqui",
+    "html": "O problema do seu estoque pode começar aqui.html",
+    "links_validated": true,
+    "images_validated": true
+  },
+  "O problema do seu estoque pode comecar aqui": {
+    "subject": "O problema do seu estoque pode começar aqui",
+    "html": "O problema do seu estoque pode começar aqui.html",
+    "links_validated": true,
+    "images_validated": true
+  },
+  "o-problema-do-seu-estoque-pode-comecar-aqui": {
+    "subject": "O problema do seu estoque pode começar aqui",
+    "html": "O problema do seu estoque pode começar aqui.html",
+    "links_validated": true,
+    "images_validated": true
+  },
+  "Qualimpressora": {
+    "subject": "Qual impressora usar para suas etiquetas?",
+    "html": "Qualimpressorautilizar.html",
+    "links_validated": true,
+    "images_validated": true
+  },
+  "Qualimpressorautilizar": {
+    "subject": "Qual impressora usar para suas etiquetas?",
+    "html": "Qualimpressorautilizar.html",
+    "links_validated": true,
+    "images_validated": true
+  }
+}
