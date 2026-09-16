@@ -5,6 +5,11 @@ from bs4 import BeautifulSoup
 
 GREEN_BOX_COLOR = "#40A155"
 WHITE_BACKGROUND = "#FFFFFF"
+FOOTER_ADDRESS = "Avenida Alfredo Camarate, 150 – São Luiz- Belo Horizonte, Minas Gerais."
+FOOTER_ADDRESS_NO_AUTOLINK = (
+    "Avenida Alfredo Camarate,\u200c 150 – São Luiz-\u200c "
+    "Belo Horizonte,\u200c Minas Gerais."
+)
 
 
 def clean_saved_preview_html(source_path: Path, destination_path: Path) -> None:
@@ -26,6 +31,7 @@ def clean_saved_preview_html(source_path: Path, destination_path: Path) -> None:
     _replace_name_merge_tags(soup)
     _rewrite_relative_images_to_cid(soup)
     _remove_click_tracking_blockers(soup)
+    _prevent_footer_address_auto_link(soup)
     _polish_canva_layout(soup)
     _repair_empty_table_links(soup)
 
@@ -153,6 +159,13 @@ def _rewrite_relative_images_to_cid(soup: BeautifulSoup) -> None:
 def _remove_click_tracking_blockers(soup: BeautifulSoup) -> None:
     for link in soup.find_all("a"):
         link.attrs.pop("ses:no-track", None)
+
+
+def _prevent_footer_address_auto_link(soup: BeautifulSoup) -> None:
+    for text_node in soup.find_all(string=True):
+        if FOOTER_ADDRESS not in text_node:
+            continue
+        text_node.replace_with(text_node.replace(FOOTER_ADDRESS, FOOTER_ADDRESS_NO_AUTOLINK))
 
 
 def _is_remote_or_embedded_src(src: str) -> bool:

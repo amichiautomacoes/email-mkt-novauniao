@@ -1,6 +1,7 @@
 from bs4 import BeautifulSoup
 
 from email_mkt.config import Settings
+from email_mkt.templates.cleaner import FOOTER_ADDRESS
 from email_mkt.templates.renderer import TemplateRenderer
 
 
@@ -86,3 +87,5 @@ def test_setembro_templates_use_catalog_subjects() -> None:
         assert "Ol" in message.html
         assert "{{ contact.nome }}" not in message.html
         assert "ses:no-track" not in message.html
+        assert FOOTER_ADDRESS not in message.html
+        assert "Avenida Alfredo Camarate,\u200c 150" in message.html
