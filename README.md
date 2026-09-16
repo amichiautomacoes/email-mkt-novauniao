@@ -140,6 +140,7 @@ Eventos recomendados:
 email.bounced
 email.clicked
 email.complained
+email.delivered
 email.opened
 ```
 

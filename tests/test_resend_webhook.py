@@ -8,6 +8,7 @@ import pytest
 from email_mkt.config import Settings
 from email_mkt.webhooks import resend
 from email_mkt.webhooks.resend import (
+    ALLOWED_RESEND_WEBHOOK_EVENTS,
     ResendWebhookEvent,
     ResendWebhookRepository,
     WebhookVerificationError,
@@ -47,6 +48,10 @@ def test_verify_resend_webhook_rejects_invalid_signature() -> None:
             secret="whsec_" + base64.b64encode(b"test-secret").decode("ascii"),
             now=1786536000,
         )
+
+
+def test_delivered_event_is_allowed() -> None:
+    assert "email.delivered" in ALLOWED_RESEND_WEBHOOK_EVENTS
 
 
 def test_webhook_repository_saves_campaign_template_and_lote_tags(monkeypatch) -> None:

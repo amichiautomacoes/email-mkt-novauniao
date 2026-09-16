@@ -55,7 +55,19 @@ Todo email clean precisa cumprir estes pontos antes de teste ou envio:
 - Todo `<a href="...">` precisa ter texto clicavel ou imagem clicavel dentro dele.
 - Nao pode existir link vazio com a imagem fora do `<a>`.
 - Links de CTA, WhatsApp e Instagram precisam ser preservados.
+- Links de CTA, WhatsApp e Instagram nao podem ter atributos que desativem tracking, como `ses:no-track`.
 - Tokens de plataforma externa, como `unsubscribe_url`, `tracking_pixel_url` e referencias de RD Station, devem ser removidos quando forem lixo do export.
+
+### Tracking de clique da Resend
+
+Erro: o HTML exportado trazer `ses:no-track` nos CTAs, links de WhatsApp ou Instagram.
+
+Padrao correto:
+
+- preservar o `href` original do CTA;
+- remover `ses:no-track` dos links que precisam aparecer nas metricas;
+- nao substituir CTA por imagem solta, texto sem link ou link vazio;
+- manter WhatsApp e Instagram como links normais para a Resend conseguir reescrever o destino quando o click tracking estiver ativo no dominio.
 
 ## Pontos que ja deram erro e nao podem voltar
 
@@ -117,6 +129,7 @@ Renderize ou envie um teste para um email interno e confira no Gmail:
 - Gmail nao mostra imagens como anexos;
 - botoes de WhatsApp abrem corretamente;
 - icone do Instagram abre corretamente;
+- links de CTA, WhatsApp e Instagram nao possuem `ses:no-track`;
 - nao existe texto estranho de template/exportacao.
 
 ## Sequencia segura de trabalho

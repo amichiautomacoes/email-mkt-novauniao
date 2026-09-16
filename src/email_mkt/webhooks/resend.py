@@ -17,6 +17,7 @@ ALLOWED_RESEND_WEBHOOK_EVENTS = {
     "email.bounced",
     "email.clicked",
     "email.complained",
+    "email.delivered",
     "email.opened",
 }
 

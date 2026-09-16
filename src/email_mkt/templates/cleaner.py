@@ -25,6 +25,7 @@ def clean_saved_preview_html(source_path: Path, destination_path: Path) -> None:
     _remove_template_tokens(soup)
     _replace_name_merge_tags(soup)
     _rewrite_relative_images_to_cid(soup)
+    _remove_click_tracking_blockers(soup)
     _polish_canva_layout(soup)
     _repair_empty_table_links(soup)
 
@@ -147,6 +148,11 @@ def _rewrite_relative_images_to_cid(soup: BeautifulSoup) -> None:
             continue
 
         image["src"] = f"cid:{Path(src).name}"
+
+
+def _remove_click_tracking_blockers(soup: BeautifulSoup) -> None:
+    for link in soup.find_all("a"):
+        link.attrs.pop("ses:no-track", None)
 
 
 def _is_remote_or_embedded_src(src: str) -> bool:
