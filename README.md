@@ -214,6 +214,9 @@ EMAIL_SCHEDULE_DRY_RUN=true
 EMAIL_CRON_SCHEDULE=*/5 * * * *
 EMAIL_SCHEDULE_SPREADSHEET_NAME=Cronograma Email MKT
 EMAIL_SCHEDULE_SPREADSHEET_ID=
+TEMPLATES_CATALOG_PATH=templates/novembro-26/catalog.json
+TEMPLATES_RAW_DIR=templates/novembro-26/raw
+TEMPLATES_CLEAN_DIR=templates/novembro-26/clean
 GOOGLE_SERVICE_ACCOUNT_FILE=mkt-novauniao-d64a259b4a40.json
 GOOGLE_SERVICE_ACCOUNT_JSON=
 GOOGLE_SERVICE_ACCOUNT_JSON_BASE64=
@@ -312,6 +315,9 @@ EMAIL_SCHEDULE_DRY_RUN=true
 EMAIL_CRON_SCHEDULE=*/5 * * * *
 EMAIL_SCHEDULE_SPREADSHEET_NAME=Cronograma Email MKT
 EMAIL_SCHEDULE_SPREADSHEET_ID=
+TEMPLATES_CATALOG_PATH=templates/novembro-26/catalog.json
+TEMPLATES_RAW_DIR=templates/novembro-26/raw
+TEMPLATES_CLEAN_DIR=templates/novembro-26/clean
 GOOGLE_SERVICE_ACCOUNT_FILE=mkt-novauniao-d64a259b4a40.json
 GOOGLE_SERVICE_ACCOUNT_JSON=
 GOOGLE_SERVICE_ACCOUNT_JSON_BASE64=
@@ -321,6 +327,17 @@ TZ=America/Sao_Paulo
 Em producao, prefira configurar `GOOGLE_SERVICE_ACCOUNT_JSON_BASE64` como secret
 com o JSON da service account codificado em Base64, ou montar o arquivo indicado
 por `GOOGLE_SERVICE_ACCOUNT_FILE` dentro do container.
+
+Os templates padrao sao os de `novembro-26`. O worker repassa as tres variaveis
+`TEMPLATES_*` ao cron quando estao definidas e preserva os padroes da aplicacao
+quando estao ausentes. Se o EasyPanel ja tiver caminhos de outro mes, atualize
+as tres variaveis antes do redeploy. Alterar o `.env` local nao muda o EasyPanel.
+
+Depois do deploy, valide o primeiro horario em modo simulado:
+
+```bash
+python scripts/run_scheduled_campaign.py --run-date 2026-10-28 --run-time 09:00 --dry-run
+```
 
 Para o primeiro deploy, mantenha:
 

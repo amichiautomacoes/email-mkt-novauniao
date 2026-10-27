@@ -214,7 +214,7 @@ def _normalize_campaign_key(value: str) -> str:
     campaign = value.strip()
     campaign = re.sub(r"^campanha\s+", "", campaign, flags=re.IGNORECASE)
     campaign = _strip_accents(campaign).lower()
-    campaign = re.sub(r"[^a-z0-9]+", "-", campaign).strip("-")
+    campaign = re.sub(r"[^a-z0-9_]+", "-", campaign).strip("-")
     if not campaign:
         raise ValueError("Campanha vazia no cronograma.")
     return campaign

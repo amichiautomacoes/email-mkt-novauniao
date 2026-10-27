@@ -10,6 +10,7 @@ from email_mkt.scheduling.google_drive_csv import (
     _load_service_account_info,
     parse_schedule_csv,
 )
+from email_mkt.templates.renderer import TemplateRenderer
 from scripts.run_scheduled_campaign import (
     get_scheduled_campaigns,
     parse_bool_env,
@@ -47,6 +48,36 @@ def test_parse_schedule_csv_normalizes_accented_campaign_key_for_catalog_alias()
 
     assert schedule[0].campaign_key == "4dicasinfaliveis"
     assert schedule[0].template_key == "4dicasinfaliveis"
+
+
+@pytest.mark.parametrize(
+    ("key", "subject"),
+    [
+        ("preparacao_black_friday", "Não esqueça disso na Black Friday!"),
+        ("produtividade_agilidade_operacao", "Sua equipe perde tempo com isso?"),
+        ("valorizacao_marca", "O cliente percebe esse detalhe?"),
+        ("comercial_direta", "Vai deixar sua reposição para depois?"),
+    ],
+)
+def test_november_schedule_renders_campaign_from_default_catalog(
+    key: str, subject: str, monkeypatch
+) -> None:
+    for name in ("TEMPLATES_CATALOG_PATH", "TEMPLATES_RAW_DIR", "TEMPLATES_CLEAN_DIR"):
+        monkeypatch.delenv(name, raising=False)
+    schedule = parse_schedule_csv(
+        "Leads segmentados,Data do Envio,Horario,Campanha\n"
+        f"Lote 1,28/10/2026,09:00,{key}",
+        reference_date=date(2026, 10, 28),
+    )
+
+    message = TemplateRenderer(Settings(_env_file=None)).render_message(
+        schedule[0].template_key,
+        {"email": "audit@example.invalid", "nome": "Cliente"},
+    )
+
+    assert schedule[0].template_key == key
+    assert message.subject == subject
+    assert message.attachments
 
 
 def test_parse_schedule_csv_ignores_incomplete_rows() -> None:

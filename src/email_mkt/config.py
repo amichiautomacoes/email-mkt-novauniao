@@ -45,15 +45,15 @@ class Settings(BaseSettings):
     )
 
     templates_catalog_path: Path = Field(
-        default=Path("templates/setembro-2026/catalog.json"),
+        default=Path("templates/novembro-26/catalog.json"),
         alias="TEMPLATES_CATALOG_PATH",
     )
     templates_raw_dir: Path = Field(
-        default=Path("templates/setembro-2026/raw"),
+        default=Path("templates/novembro-26/raw"),
         alias="TEMPLATES_RAW_DIR",
     )
     templates_clean_dir: Path = Field(
-        default=Path("templates/setembro-2026/clean"),
+        default=Path("templates/novembro-26/clean"),
         alias="TEMPLATES_CLEAN_DIR",
     )
 

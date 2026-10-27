@@ -7,7 +7,7 @@ CRON_FILE="/etc/cron.d/email-mkt"
 
 write_export() {
   key="$1"
-  value="$(printenv "$key" 2>/dev/null || true)"
+  value="$(printenv "$key" 2>/dev/null)" || return 0
   escaped="$(printf "%s" "$value" | sed "s/'/'\\\\''/g")"
   printf "export %s='%s'\n" "$key" "$escaped" >> "$CRON_ENV_FILE"
 }
@@ -30,6 +30,9 @@ for key in \
   GOOGLE_SERVICE_ACCOUNT_FILE \
   GOOGLE_SERVICE_ACCOUNT_JSON \
   GOOGLE_SERVICE_ACCOUNT_JSON_BASE64 \
+  TEMPLATES_CATALOG_PATH \
+  TEMPLATES_RAW_DIR \
+  TEMPLATES_CLEAN_DIR \
   TZ
 do
   write_export "$key"

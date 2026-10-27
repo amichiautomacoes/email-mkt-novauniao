@@ -119,7 +119,14 @@ def test_setembro_templates_use_catalog_subjects() -> None:
         "Qualimpressora": "Qual impressora usar para suas etiquetas?",
         "Qualimpressorautilizar": "Qual impressora usar para suas etiquetas?",
     }
-    renderer = TemplateRenderer(Settings())
+    renderer = TemplateRenderer(
+        Settings(
+            _env_file=None,
+            templates_catalog_path="templates/setembro-2026/catalog.json",
+            templates_raw_dir="templates/setembro-2026/raw",
+            templates_clean_dir="templates/setembro-2026/clean",
+        )
+    )
 
     for template_key, subject in expected_subjects.items():
         message = renderer.render_message(
