@@ -1,0 +1,28 @@
+{
+  "metadata": {
+    "usage": "Medidas propostas para email HTML; não extraídas da interface do Instagram",
+    "unit": "px"
+  },
+  "scale": [4, 8, 12, 16, 24, 32, 40],
+  "layout": {
+    "max_width": 600,
+    "desktop_padding": 24,
+    "mobile_padding": 20,
+    "paragraph_gap": 16,
+    "section_gap": 32,
+    "logo_clear_space": 16
+  },
+  "button": {
+    "min_touch_height": 44,
+    "reference_height": 48,
+    "padding_vertical": 14,
+    "padding_horizontal": 24,
+    "border_radius": 6
+  },
+  "logo": {
+    "reference_width": 180,
+    "max_reference_width": 200,
+    "original_width": 490,
+    "original_height": 236
+  }
+}

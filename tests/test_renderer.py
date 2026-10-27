@@ -1,8 +1,52 @@
+import base64
+from pathlib import Path
+
 from bs4 import BeautifulSoup
 
 from email_mkt.config import Settings
 from email_mkt.templates.cleaner import FOOTER_ADDRESS
 from email_mkt.templates.renderer import TemplateRenderer
+
+
+def test_renderer_sends_real_jpeg_and_png_with_matching_media_types(tmp_path) -> None:
+    raw_dir = tmp_path / "raw"
+    image_dir = raw_dir / "images"
+    image_dir.mkdir(parents=True)
+    assets = {
+        "product.jpg": (
+            Path(
+                "templates/design-system/references/produtos/Tag2colunas-50x75x2/01Tag2colunas-50x75x2.jpg"
+            ),
+            "image/jpeg",
+        ),
+        "logo.png": (
+            Path(
+                "templates/setembro-2026/raw/3dicasdiminuirdesperdicio/images/59e0914a0499ca4a8567debab82856c7.png"
+            ),
+            "image/png",
+        ),
+    }
+    for filename, (source, _) in assets.items():
+        (image_dir / filename).write_bytes(source.read_bytes())
+    (raw_dir / "mixed.html").write_text(
+        '<html><body><img src="cid:product.jpg"><img src="cid:logo.png"></body></html>',
+        encoding="utf-8",
+    )
+    renderer = TemplateRenderer(
+        Settings(
+            _env_file=None,
+            templates_catalog_path=tmp_path / "catalog.json",
+            templates_raw_dir=raw_dir,
+            templates_clean_dir=tmp_path / "clean",
+        )
+    )
+    message = renderer.render_message("mixed", {"email": "teste@example.com"})
+    assert len(message.attachments) == 2
+    for attachment in message.attachments:
+        source, media_type = assets[attachment["filename"]]
+        assert attachment["content_type"] == media_type
+        assert attachment["content_disposition"] == "inline"
+        assert base64.b64decode(attachment["content"]) == source.read_bytes()
 
 
 def _agosto_settings() -> Settings:

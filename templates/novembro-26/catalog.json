@@ -1,0 +1,26 @@
+{
+  "preparacao_black_friday": {
+    "subject": "Black Friday: confira sua etiquetagem",
+    "html": "preparacao_black_friday.html",
+    "links_validated": true,
+    "images_validated": true
+  },
+  "produtividade_agilidade_operacao": {
+    "subject": "Etiquetas à mão nos horários de pico",
+    "html": "produtividade_agilidade_operacao.html",
+    "links_validated": true,
+    "images_validated": true
+  },
+  "valorizacao_marca": {
+    "subject": "Sua marca também está na etiqueta",
+    "html": "valorizacao_marca.html",
+    "links_validated": true,
+    "images_validated": true
+  },
+  "comercial_direta": {
+    "subject": "Vai repor etiquetas para o fim de ano?",
+    "html": "comercial_direta.html",
+    "links_validated": true,
+    "images_validated": true
+  }
+}

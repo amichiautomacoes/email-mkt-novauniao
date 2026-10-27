@@ -1,4 +1,5 @@
 import base64
+import mimetypes
 import re
 from pathlib import Path
 
@@ -54,8 +55,11 @@ class TemplateRenderer:
             attachments.append(
                 {
                     "filename": filename,
-                    "content": base64.b64encode(image_path.read_bytes()).decode("ascii"),
-                    "content_type": "image/png",
+                    "content": base64.b64encode(image_path.read_bytes()).decode(
+                        "ascii"
+                    ),
+                    "content_type": mimetypes.guess_type(image_path.name)[0]
+                    or "application/octet-stream",
                     "content_id": filename,
                     "content_disposition": "inline",
                 }

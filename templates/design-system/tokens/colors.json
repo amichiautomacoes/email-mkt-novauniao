@@ -1,0 +1,47 @@
+{
+  "metadata": {
+    "brand": "Nova União Etiquetas",
+    "source": "https://www.instagram.com/novauniaoetiquetas/",
+    "analyzed_on": "2026-10-26",
+    "method": "Amostras aproximadas das capas, avatar e logotipo local; neutros de leitura propostos para email. Consultar design.md para as origens."
+  },
+  "brand": {
+    "primary": "#2967A2",
+    "accent": "#1C64CB",
+    "highlight": "#4598EF",
+    "cyan": "#1DDEF8"
+  },
+  "background": {
+    "dark": "#010A1B",
+    "paper": "#FFFFFF",
+    "soft": "#F3F7FB"
+  },
+  "text": {
+    "primary": "#172B3A",
+    "secondary": "#526479",
+    "inverse": "#FFFFFF"
+  },
+  "border": {
+    "subtle": "#DCE5EF"
+  },
+  "pairings": {
+    "hero": {
+      "background": "#010A1B",
+      "text": "#FFFFFF",
+      "highlight": "#4598EF"
+    },
+    "body": {
+      "background": "#FFFFFF",
+      "text": "#172B3A",
+      "secondary": "#526479"
+    },
+    "button": {
+      "background": "#1C64CB",
+      "text": "#FFFFFF"
+    },
+    "link": {
+      "background": "#FFFFFF",
+      "text": "#2967A2"
+    }
+  }
+}

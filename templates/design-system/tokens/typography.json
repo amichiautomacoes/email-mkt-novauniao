@@ -1,0 +1,39 @@
+{
+  "metadata": {
+    "usage": "Adaptação para email HTML",
+    "source_fonts": "As famílias tipográficas das artes do Instagram não foram confirmadas. O logotipo deve ser usado como imagem original."
+  },
+  "font_family": "Arial, Helvetica, sans-serif",
+  "heading": {
+    "desktop_px": 32,
+    "mobile_px": 28,
+    "weight": 700,
+    "line_height": 1.15
+  },
+  "section_heading": {
+    "desktop_px": 22,
+    "mobile_px": 20,
+    "weight": 700,
+    "line_height": 1.25
+  },
+  "lead": {
+    "size_px": 18,
+    "weight": 400,
+    "line_height": 1.45
+  },
+  "body": {
+    "size_px": 16,
+    "weight": 400,
+    "line_height": 1.5
+  },
+  "button": {
+    "size_px": 16,
+    "weight": 700,
+    "line_height": 1.25
+  },
+  "caption": {
+    "size_px": 13,
+    "weight": 400,
+    "line_height": 1.5
+  }
+}
