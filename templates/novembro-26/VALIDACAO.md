@@ -14,10 +14,10 @@ Endereço do rodapé: o endereço agora tem link explícito para o Google Maps f
 
 | Chave para a planilha | Assunto | Foco |
 | --- | --- | --- |
-| `preparacao_black_friday` | Black Friday: confira sua etiquetagem | Conferir preço, leitura no caixa e reposição antes das promoções. |
-| `produtividade_agilidade_operacao` | Etiquetas à mão nos horários de pico | Reposição por setor e preparação da equipe antes da abertura. |
-| `valorizacao_marca` | Sua marca também está na etiqueta | Informações, identidade e formato das tags personalizadas. |
-| `comercial_direta` | Vai repor etiquetas para o fim de ano? | Pedir cotação com tipo de material, quantidade e modelo da impressora. |
+| `preparacao_black_friday` | Não esqueça disso na Black Friday! | Conferir preço, leitura no caixa e reposição antes das promoções. |
+| `produtividade_agilidade_operacao` | Sua equipe perde tempo com isso? | Reposição por setor e preparação da equipe antes da abertura. |
+| `valorizacao_marca` | O cliente percebe esse detalhe? | Informações, identidade e formato das tags personalizadas. |
+| `comercial_direta` | Vai deixar sua reposição para depois? | Pedir cotação com tipo de material, quantidade e modelo da impressora. |
 
 Os assuntos do catálogo correspondem ao `<title>` dos HTMLs. Cada email tem preheader próprio, um botão principal e, quando existente, um link textual de continuidade para o mesmo objetivo comercial. Não foram acrescentados descontos, prazos de entrega, disponibilidade ou resultados de clientes sem comprovação.
 
