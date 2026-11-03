@@ -80,7 +80,13 @@ Padrao correto:
 - HTML usa `src="cid:arquivo.png"`;
 - payload para Resend usa `content_id`;
 - payload para Resend usa `content_disposition: "inline"`;
+- no payload final, as imagens incorporadas usam nomes e `content_id` com 32 caracteres hexadecimais e extensao, conforme o padrao validado dos emails de setembro;
+- o serializador atualiza as referencias `cid:` do HTML junto com os identificadores dos arquivos, preservando os bytes das imagens; os nomes locais nos templates continuam legiveis;
 - nao usar `contentId`, porque este projeto envia via REST.
+
+Nao omitir `filename` como solucao para os cartoes do Gmail: essa tentativa nao
+resolveu o problema nos testes. A variante com nomes e CIDs opacos foi conferida
+pelo usuario no Gmail em 03/11/2026, sem imagens aparecendo como anexos.
 
 ### Nome do lead nao personalizado
 
