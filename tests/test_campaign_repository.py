@@ -27,7 +27,12 @@ def test_record_sent_recipients_upserts_control_table(monkeypatch) -> None:
     repository.record_sent_recipients(
         "lote1",
         [
-            EmailMessage(to="hugo@example.com", subject="Teste", html="<p>Teste</p>"),
+            EmailMessage(
+                to="hugo@example.com",
+                subject="Teste",
+                html="<p>Teste</p>",
+                metadata={"whatsapp_reference": "NU-" + "A" * 24},
+            ),
             EmailMessage(to="ana@example.com", subject="Teste", html="<p>Teste</p>"),
         ],
         lote_key="lote1",
@@ -48,6 +53,10 @@ def test_record_sent_recipients_upserts_control_table(monkeypatch) -> None:
         "resend-1",
     )
     assert fake_conn.committed is True
+    assert (
+        fake_cursor.executemany_params[1][0][6].obj["whatsapp_reference"]
+        == "NU-" + "A" * 24
+    )
 
 
 class FakeConnection:

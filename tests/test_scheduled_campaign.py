@@ -37,7 +37,9 @@ def test_parse_schedule_csv_maps_google_sheet_columns_without_limit() -> None:
     ]
 
 
-def test_parse_schedule_csv_normalizes_accented_campaign_key_for_catalog_alias() -> None:
+def test_parse_schedule_csv_normalizes_accented_campaign_key_for_catalog_alias() -> (
+    None
+):
     schedule = parse_schedule_csv(
         (
             "Leads segmentados,Data do Envio,Horario,Campanha\n"
@@ -53,7 +55,10 @@ def test_parse_schedule_csv_normalizes_accented_campaign_key_for_catalog_alias()
 @pytest.mark.parametrize(
     ("key", "subject"),
     [
-        ("preparacao_black_friday", "Não esqueça disso na Black Friday!"),
+        (
+            "preparacao_black_friday",
+            "Sua loja já conferiu as etiquetas para a Black Friday?",
+        ),
         ("produtividade_agilidade_operacao", "Sua equipe perde tempo com isso?"),
         ("valorizacao_marca", "O cliente percebe esse detalhe?"),
         ("comercial_direta", "Vai deixar sua reposição para depois?"),

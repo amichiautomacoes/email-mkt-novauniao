@@ -171,6 +171,125 @@ Os eventos recebidos sao validados com os headers `svix-id`, `svix-timestamp` e
 `svix-signature`, e salvos em `mkt_novauniao.email_mkt_metricas`. O `svix-id`
 tem indice unico para ignorar reentregas duplicadas da Resend.
 
+## Cliques no CTA: automacao e origem indeterminada
+
+O comando abaixo consulta os envios aceitos no periodo informado, com as datas
+inicial e final inclusivas em `America/Sao_Paulo`. As interacoes consideradas
+vao ate o momento da consulta, indicado em `events_through` no JSON.
+
+```powershell
+$env:PYTHONPATH="src"
+python -m email_mkt.cli clicks --start-date 2026-11-03 --end-date 2026-11-06 --output tmp/cliques-novembro.json
+```
+
+A consulta e somente de leitura. Ela usa o historico e os webhooks existentes
+no Supabase, sem enviar emails nem alterar o acesso direto ao WhatsApp.
+O relatorio apresenta totais por campanha e distingue:
+
+- `suspected_automated_cta_events`: eventos com navegador identificado como
+  automatizado, ou acessos a pelo menos tres hosts distintos em ate dois
+  segundos, para o mesmo email enviado, IP e navegador.
+- `indeterminate_cta_events`: eventos sem evidencias suficientes para a regra
+  acima. **Nao sao cliques humanos confirmados.**
+- `human_confirmed_cta_events`: `null` (nao mensurado), pois o projeto nao
+  registra uma confirmacao humana ou conversao posterior ao clique.
+
+A classificacao acontece por evento: um clique suspeito nao descarta todos os
+cliques posteriores do mesmo email. As regras sao heuristicas, versionadas
+em `classifier_version`, e podem produzir falsos positivos e falsos negativos.
+O relatorio nao exporta IP, navegador nem email dos destinatarios.
+
+O CTA corresponde a URL dos links HTML com `class="main-cta"` no catalogo
+selecionado pelas variaveis `TEMPLATES_*`. Instagram e Maps sao considerados
+como contexto para detectar rajadas, mas nao entram no total de cliques no CTA.
+A comparacao desconsidera apenas o sufixo de referencia WhatsApp criado pela
+pipeline, preservando a identificacao do CTA antes e depois do rastreamento.
+Para analisar outro mes, selecione o catalogo e os HTMLs correspondentes.
+Se o CTA ou o ID de envio nao puder ser identificado, a consulta falha em vez
+de apresentar um zero enganoso. Webhooks com URL ausente ou invalida aparecem
+em `click_events_without_usable_url` e nao podem ser atribuidos ao CTA.
+
+Com WhatsApp direto, este relatorio estima automacao; nao determina o numero
+exato de pessoas que clicaram. Abrir o WhatsApp nao comprova envio de mensagem.
+
+### Atribuicao de mensagens recebidas no WhatsApp
+
+Ao renderizar um email, a pipeline acrescenta ao texto pre-preenchido dos
+links diretos do WhatsApp uma referencia unica por envio:
+
+```text
+Ola! Gostaria de consultar etiquetas e ribbons.
+
+Referência: NU-0123456789ABCDEF01234567
+```
+
+O endereco continua sendo `https://wa.me/...`; nao existe pagina intermediaria.
+Os alvos dos botoes HTML e Outlook recebem a mesma referencia. O texto original
+e preservado e apenas o sufixo e acrescentado. A referencia nao contem email ou
+telefone do destinatario e fica vinculada a campanha/template e lote pelo
+historico do envio aceito, em `resend_response.whatsapp_reference`.
+Uma nova renderizacao gera outra referencia; codigos de previews nao representam
+envios reais. Nao ha atribuicao retroativa para emails enviados antes deste recurso.
+
+Quando uma mensagem com esse codigo for realmente recebida, registre-a de uma
+das formas abaixo. O sistema guarda somente referencia, ID, horario e origem;
+nao persiste o texto completo da conversa ou o telefone do remetente.
+
+**Registro manual para quem usa somente o aplicativo WhatsApp Business:** salve
+o texto real recebido em um arquivo UTF-8 dentro de `tmp/` e execute, informando
+o horario real da mensagem e um ID unico e estavel para ela:
+
+```powershell
+python -m email_mkt.cli whatsapp-received --text-file tmp/mensagem-recebida.txt --message-id atendimento-20261109-001 --received-at 2026-11-09T16:00:00-03:00
+```
+
+Reutilize o mesmo ID ao repetir o registro da mesma mensagem. Nao registre
+mensagens apenas pre-preenchidas ou que ainda nao foram recebidas.
+
+**Integracao automatica opcional:** o mesmo servico HTTP do webhook Resend aceita
+`POST /webhooks/whatsapp`. Configure um segredo forte `WHATSAPP_INBOUND_TOKEN`
+no servico `email-mkt-webhook` do EasyPanel e no integrador que recebe mensagens.
+Sem esse segredo, o endpoint responde `503 whatsapp_not_configured`.
+O `.env` local nao altera as variaveis do EasyPanel.
+
+O integrador deve encaminhar somente mensagens recebidas, excluindo mensagens
+enviadas, confirmacoes de entrega, previews e outros eventos. Ele deve adaptar
+o payload do seu provedor para o contrato abaixo, usando HTTPS e o header
+`Authorization: Bearer <WHATSAPP_INBOUND_TOKEN>`:
+
+```json
+{
+  "provider": "meu_integrador",
+  "message_id": "id-original-estavel-da-mensagem",
+  "received_at": "2026-11-09T16:00:00-03:00",
+  "text": "Texto realmente recebido, incluindo Referência: NU-0123456789ABCDEF01234567"
+}
+```
+
+Este e um contrato interno autenticado, nao um webhook nativo da Meta ou
+Evolution. O integrador deve validar o evento original antes de encaminha-lo.
+Uma mensagem sem referencia, ou com referencias diferentes, recebe `400`.
+Um registro valido recebe `200 stored`; sua repeticao recebe `200 duplicate`.
+Falha no armazenamento retorna `503` e deve ser tentada novamente com o mesmo ID.
+
+Os registros usam a tabela existente `email_mkt_metricas`, com
+`source=whatsapp_inbound`, `event_type=whatsapp.message_received` e chave de
+deduplicacao `whatsapp:<provider>:<message_id>`. Nao e necessaria migracao.
+A correlacao e refeita na consulta: uma mensagem pode chegar antes do registro
+do historico e sera atribuida assim que o envio correspondente estiver salvo.
+
+O comando `clicks` tambem apresenta, por campanha:
+
+- `sends_with_whatsapp_reference`: envios aceitos que possuem referencia.
+- `whatsapp_reply_events`: mensagens recebidas com referencia atribuida.
+- `sends_with_whatsapp_reply`: envios distintos que originaram essas respostas.
+
+Essas metricas medem respostas atribuidas, nao todos os cliques humanos. O
+usuario pode remover o codigo ou encaminhar o email; a referencia nao comprova
+a identidade de quem respondeu. `human_confirmed_cta_events` continua `null`.
+Se `sends_with_whatsapp_reference=0`, o periodo nao tem cobertura deste recurso;
+zero respostas nesse caso nao significa que ninguem entrou em contato.
+
 ## Programacao automatica
 
 O agendamento automatico usa a planilha Google Sheets `Cronograma Email MKT`

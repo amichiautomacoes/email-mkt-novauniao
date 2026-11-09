@@ -1,9 +1,17 @@
+import hmac
 import json
 import os
 from http import HTTPStatus
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
+from urllib.parse import urlsplit
+
+import psycopg
 
 from email_mkt.config import get_settings
+from email_mkt.metrics.whatsapp_attribution import (
+    WhatsAppReceiptRepository,
+    parse_receipt,
+)
 from email_mkt.webhooks.resend import (
     ALLOWED_RESEND_WEBHOOK_EVENTS,
     ResendWebhookRepository,
@@ -12,23 +20,64 @@ from email_mkt.webhooks.resend import (
 )
 
 WEBHOOK_PATH = "/webhooks/resend"
+WHATSAPP_PATH = "/webhooks/whatsapp"
+MAX_BODY_BYTES = 1024 * 1024
 
 
 class ResendWebhookHandler(BaseHTTPRequestHandler):
-    def do_GET(self) -> None:  # noqa: N802
+    def do_GET(self) -> None:
         if self.path == "/health":
             self._json_response(HTTPStatus.OK, {"ok": True})
             return
         self._json_response(HTTPStatus.NOT_FOUND, {"error": "not_found"})
 
-    def do_POST(self) -> None:  # noqa: N802
-        if self.path != WEBHOOK_PATH:
+    def do_POST(self) -> None:
+        if self.path not in {WEBHOOK_PATH, WHATSAPP_PATH}:
             self._json_response(HTTPStatus.NOT_FOUND, {"error": "not_found"})
             return
 
-        content_length = int(self.headers.get("content-length", "0"))
-        payload = self.rfile.read(content_length)
         settings = get_settings()
+        if self.path == WHATSAPP_PATH:
+            if not settings.whatsapp_inbound_token:
+                self._json_response(
+                    HTTPStatus.SERVICE_UNAVAILABLE, {"error": "whatsapp_not_configured"}
+                )
+                return
+            supplied = self.headers.get("authorization", "").encode("utf-8")
+            expected = ("Bearer " + settings.whatsapp_inbound_token).encode("utf-8")
+            if not hmac.compare_digest(supplied, expected):
+                self._json_response(HTTPStatus.UNAUTHORIZED, {"error": "unauthorized"})
+                return
+        try:
+            content_length = int(self.headers.get("content-length", "0"))
+        except ValueError:
+            self._json_response(
+                HTTPStatus.BAD_REQUEST, {"error": "invalid_content_length"}
+            )
+            return
+        if not 0 < content_length <= MAX_BODY_BYTES:
+            self._json_response(HTTPStatus.BAD_REQUEST, {"error": "invalid_body_size"})
+            return
+        payload = self.rfile.read(content_length)
+        if self.path == WHATSAPP_PATH:
+            try:
+                receipt = parse_receipt(json.loads(payload))
+                inserted = WhatsAppReceiptRepository(settings).save(receipt)
+            except (ValueError, TypeError, UnicodeDecodeError):
+                self._json_response(
+                    HTTPStatus.BAD_REQUEST, {"error": "invalid_whatsapp_receipt"}
+                )
+                return
+            except psycopg.Error:
+                self._json_response(
+                    HTTPStatus.SERVICE_UNAVAILABLE, {"error": "storage_unavailable"}
+                )
+                return
+            self._json_response(
+                HTTPStatus.OK,
+                {"ok": True, "status": "stored" if inserted else "duplicate"},
+            )
+            return
 
         try:
             event = verify_resend_webhook(
@@ -71,7 +120,8 @@ class ResendWebhookHandler(BaseHTTPRequestHandler):
         )
 
     def log_message(self, format: str, *args) -> None:
-        print(f"{self.address_string()} - {format % args}")
+        # Do not log headers, body or query parameters from incoming messages.
+        print(f"{self.address_string()} - {self.command} {urlsplit(self.path).path}")
 
     def _json_response(self, status: HTTPStatus, body: dict) -> None:
         data = json.dumps(body).encode("utf-8")

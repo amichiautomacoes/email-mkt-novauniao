@@ -85,14 +85,28 @@ class CampaignRepository:
                 campaign_key,
                 str(message.metadata.get("template") or campaign_key),
                 _resend_id_at(resend_email_ids, index),
-                Jsonb({"resend_email_id": _resend_id_at(resend_email_ids, index)}),
+                Jsonb(
+                    {
+                        "resend_email_id": _resend_id_at(resend_email_ids, index),
+                        **(
+                            {
+                                "whatsapp_reference": message.metadata[
+                                    "whatsapp_reference"
+                                ]
+                            }
+                            if message.metadata.get("whatsapp_reference")
+                            else {}
+                        ),
+                    }
+                ),
             )
             for index, message in enumerate(messages)
         ]
 
-        with psycopg.connect(
-            self.settings.supabase_database_url
-        ) as conn, conn.cursor() as cur:
+        with (
+            psycopg.connect(self.settings.supabase_database_url) as conn,
+            conn.cursor() as cur,
+        ):
             cur.executemany(control_query, control_params)
             cur.executemany(history_query, history_params)
             conn.commit()

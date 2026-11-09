@@ -7,6 +7,7 @@ from jinja2 import Environment, FileSystemLoader, select_autoescape
 
 from email_mkt.campaigns.models import EmailMessage
 from email_mkt.config import Settings
+from email_mkt.metrics.whatsapp_attribution import add_reference_to_html, new_reference
 from email_mkt.templates.catalog import TemplateCatalog
 
 
@@ -25,6 +26,11 @@ class TemplateRenderer:
         template_name = metadata.html if metadata else f"{template_key}.html"
         template = self.env.get_template(template_name)
         html = template.render(contact=contact)
+        reference = new_reference()
+        html, has_whatsapp_reference = add_reference_to_html(html, reference)
+        message_metadata = {"contact_id": contact.get("id"), "template": template_key}
+        if has_whatsapp_reference:
+            message_metadata["whatsapp_reference"] = reference
         return EmailMessage(
             to=contact["email"],
             subject=contact.get("subject")
@@ -34,7 +40,7 @@ class TemplateRenderer:
             html=html,
             reply_to=self.settings.email_reply_to or None,
             attachments=self._inline_attachments(html, template_name, template_key),
-            metadata={"contact_id": contact.get("id"), "template": template_key},
+            metadata=message_metadata,
         )
 
     def _select_template_dir(self) -> Path:
