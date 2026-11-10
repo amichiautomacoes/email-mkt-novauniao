@@ -1,0 +1,31 @@
+{
+  "bucket": "email-mkt-assets",
+  "public": true,
+  "image_delivery": "https-no-attachments",
+  "assets": {
+    "logo-nova-uniao-oficial.png": {
+      "local": "templates\\novembro-26\\raw\\01_black_friday_nova_uniao_copy_humana\\images\\logo-nova-uniao-oficial.png",
+      "object_path": "novembro-26/01_black_friday_nova_uniao_copy_humana/24359c54cc5592c29ea9d05cbc2656b5d9fbf0a5d0f11b5b3af3cd241b280f00.png",
+      "sha256": "24359c54cc5592c29ea9d05cbc2656b5d9fbf0a5d0f11b5b3af3cd241b280f00",
+      "content_type": "image/png",
+      "bytes": 5040,
+      "url": "https://vzurayoxjegqjxgmjheo.supabase.co/storage/v1/object/public/email-mkt-assets/novembro-26/01_black_friday_nova_uniao_copy_humana/24359c54cc5592c29ea9d05cbc2656b5d9fbf0a5d0f11b5b3af3cd241b280f00.png"
+    },
+    "hero-01_reposicao_antecipada-v1.jpg": {
+      "local": "templates\\novembro-26\\raw\\01_black_friday_nova_uniao_copy_humana\\images\\hero-01_reposicao_antecipada-v1.jpg",
+      "object_path": "novembro-26/01_black_friday_nova_uniao_copy_humana/5c04cd849c61d8d0b5f157c240d5a52dbe504822d89be604d1570fbc4ff9c682.jpg",
+      "sha256": "5c04cd849c61d8d0b5f157c240d5a52dbe504822d89be604d1570fbc4ff9c682",
+      "content_type": "image/jpeg",
+      "bytes": 66801,
+      "url": "https://vzurayoxjegqjxgmjheo.supabase.co/storage/v1/object/public/email-mkt-assets/novembro-26/01_black_friday_nova_uniao_copy_humana/5c04cd849c61d8d0b5f157c240d5a52dbe504822d89be604d1570fbc4ff9c682.jpg"
+    },
+    "instagram-rodape.png": {
+      "local": "templates\\novembro-26\\raw\\01_black_friday_nova_uniao_copy_humana\\images\\instagram-rodape.png",
+      "object_path": "novembro-26/01_black_friday_nova_uniao_copy_humana/c1f9765940b1ae1978b07e718d863cc91dc0071a3e41553496156a8cd54f3dc8.png",
+      "sha256": "c1f9765940b1ae1978b07e718d863cc91dc0071a3e41553496156a8cd54f3dc8",
+      "content_type": "image/png",
+      "bytes": 5066,
+      "url": "https://vzurayoxjegqjxgmjheo.supabase.co/storage/v1/object/public/email-mkt-assets/novembro-26/01_black_friday_nova_uniao_copy_humana/c1f9765940b1ae1978b07e718d863cc91dc0071a3e41553496156a8cd54f3dc8.png"
+    }
+  }
+}

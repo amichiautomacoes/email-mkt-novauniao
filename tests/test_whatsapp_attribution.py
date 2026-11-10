@@ -60,7 +60,7 @@ def test_renderer_generates_unique_reference_per_send_without_leaking_email():
     renderer = TemplateRenderer(Settings(_env_file=None))
     messages = [
         renderer.render_message(
-            "preparacao_black_friday", {"email": "lead@example.invalid"}
+            "01_black_friday_nova_uniao_copy_humana", {"email": "lead@example.invalid"}
         )
         for _ in range(2)
     ]

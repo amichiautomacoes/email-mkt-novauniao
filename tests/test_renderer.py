@@ -1,4 +1,5 @@
 import base64
+import json
 from pathlib import Path
 
 from bs4 import BeautifulSoup
@@ -140,3 +141,31 @@ def test_setembro_templates_use_catalog_subjects() -> None:
         assert "ses:no-track" not in message.html
         assert FOOTER_ADDRESS not in message.html
         assert "Avenida Alfredo Camarate,\u200c 150" in message.html
+
+
+def test_black_friday_hosted_images_do_not_generate_email_attachments() -> None:
+    from email_mkt.sending.resend_client import ResendClient
+
+    settings = Settings(_env_file=None)
+    message = TemplateRenderer(settings).render_message(
+        "01_black_friday_nova_uniao_copy_humana",
+        {"email": "audit@example.invalid", "nome": "Hugo"},
+    )
+    manifest = json.loads(
+        Path(
+            "templates/novembro-26/references/black-friday-public-assets.json"
+        ).read_text(encoding="utf-8")
+    )
+    sources = {
+        image["src"] for image in BeautifulSoup(message.html, "lxml").select("img[src]")
+    }
+    assert len(sources) == 3
+    assert sources == {asset["url"] for asset in manifest["assets"].values()}
+    assert all(src.startswith("https://") and "?" not in src for src in sources)
+    assert "cid:" not in message.html
+    assert message.attachments == []
+    client = ResendClient(settings)
+    try:
+        assert "attachments" not in client._serialize_message(message)
+    finally:
+        client.client.close()

@@ -47,7 +47,7 @@ Todo email clean precisa cumprir estes pontos antes de teste ou envio:
 - O placeholder de nome deve virar `{{ contact.nome }}` no clean.
 - No email renderizado, o lead deve receber o valor do campo `nome` da tabela `email_mkt_leads`.
 - Nunca pode sobrar `[PRIMEIRO NOME]`, `[Primeiro Nome]`, `*|PRIMEIRO_NOME|*` ou `*|NOME|*`.
-- Imagens devem usar `cid:nome-da-imagem.png` no HTML.
+- Por padrao, imagens devem usar `cid:nome-da-imagem.png` no HTML; a excecao HTTPS documentada abaixo nao gera anexos.
 - Imagens nao podem ficar como `src="images/..."`.
 - Imagens nao podem ficar como `data:image...`.
 - Imagens precisam ser enviadas como inline pela Resend, nao como anexo visivel no Gmail.
@@ -87,6 +87,25 @@ Padrao correto:
 Nao omitir `filename` como solucao para os cartoes do Gmail: essa tentativa nao
 resolveu o problema nos testes. A variante com nomes e CIDs opacos foi conferida
 pelo usuario no Gmail em 03/11/2026, sem imagens aparecendo como anexos.
+
+### Excecao validada: imagens HTTPS sem anexos
+
+Em 10/11/2026, o usuario confirmou que a imagem principal do template
+`01_black_friday_nova_uniao_copy_humana` ainda aparecia como cartao de anexo
+no Gmail, mesmo com CID e `content_disposition: "inline"`. Nomes opacos nao
+sao garantia de que o cliente ocultara esses cartoes.
+
+Para esse template, o usuario autorizou publicar apenas suas tres imagens
+comerciais no bucket publico `email-mkt-assets` do Supabase. Raw e clean usam
+as URLs HTTPS publicas, permanentes e versionadas pelo hash do arquivo. O
+manifesto fica em `novembro-26/references/black-friday-public-assets.json`.
+O payload deste email deve ter **zero anexos**, mantendo o conteudo e os links.
+Nao usar URLs assinadas que expiram nem incluir chaves nos enderecos.
+
+Verificar acesso anonimo HTTP 200, MIME de imagem e bytes iguais aos arquivos
+locais antes do teste. Nao excluir ou substituir esses objetos apos o envio:
+emails antigos continuam dependendo das URLs. Clientes que bloqueiam imagens
+remotas podem exigir que o leitor autorize sua exibicao.
 
 ### Nome do lead nao personalizado
 

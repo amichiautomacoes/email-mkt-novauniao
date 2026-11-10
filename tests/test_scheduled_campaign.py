@@ -2,6 +2,8 @@ import base64
 import json
 from datetime import date, time
 
+from bs4 import BeautifulSoup
+
 import pytest
 
 from email_mkt.config import Settings
@@ -56,12 +58,12 @@ def test_parse_schedule_csv_normalizes_accented_campaign_key_for_catalog_alias()
     ("key", "subject"),
     [
         (
-            "preparacao_black_friday",
-            "Sua loja já conferiu as etiquetas para a Black Friday?",
+            "01_black_friday_nova_uniao_copy_humana",
+            "Black Friday à vista: como estão suas etiquetas?",
         ),
-        ("produtividade_agilidade_operacao", "Sua equipe perde tempo com isso?"),
-        ("valorizacao_marca", "O cliente percebe esse detalhe?"),
-        ("comercial_direta", "Vai deixar sua reposição para depois?"),
+        ("02_identificacao_e_preco", "Chegou mercadoria? Cote as etiquetas"),
+        ("03_ribbons_e_compatibilidade", "Cote o ribbon antes de comprar errado"),
+        ("04_cotacao_simples", "Peça sua cotação de etiquetas no WhatsApp"),
     ],
 )
 def test_november_schedule_renders_campaign_from_default_catalog(
@@ -71,8 +73,8 @@ def test_november_schedule_renders_campaign_from_default_catalog(
         monkeypatch.delenv(name, raising=False)
     schedule = parse_schedule_csv(
         "Leads segmentados,Data do Envio,Horario,Campanha\n"
-        f"Lote 1,28/10/2026,09:00,{key}",
-        reference_date=date(2026, 10, 28),
+        f"Lote 1,11/11/2026,09:00,{key}",
+        reference_date=date(2026, 11, 11),
     )
 
     message = TemplateRenderer(Settings(_env_file=None)).render_message(
@@ -82,7 +84,14 @@ def test_november_schedule_renders_campaign_from_default_catalog(
 
     assert schedule[0].template_key == key
     assert message.subject == subject
-    assert message.attachments
+    image_sources = [
+        image["src"] for image in BeautifulSoup(message.html, "lxml").select("img[src]")
+    ]
+    assert image_sources
+    attached_cids = {"cid:" + item["content_id"] for item in message.attachments}
+    assert all(
+        src in attached_cids or src.startswith("https://") for src in image_sources
+    )
 
 
 def test_parse_schedule_csv_ignores_incomplete_rows() -> None:

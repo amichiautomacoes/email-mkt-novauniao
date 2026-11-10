@@ -1,0 +1,106 @@
+{
+  "tool": "image_gen (geracao integrada)",
+  "model": "gpt-image-2 (geracao integrada documentada; sem seletor explicito)",
+  "purpose": "Quatro composicoes ilustrativas para os novos emails comerciais",
+  "created_on": "2026-11-09",
+  "disclosure": "Composição ilustrativa gerada com IA a partir de referências de produto.",
+  "assets": [
+    {
+      "key": "01_reposicao_antecipada",
+      "references": [
+        {
+          "path": "templates/novembro-26/raw/images/etiquetas-adesivas-referencia.jpg",
+          "role": "fotografia real do produto"
+        },
+        {
+          "path": "templates/novembro-26/raw/images/tags-impressao-referencia.jpg",
+          "role": "fotografia real do produto"
+        }
+      ],
+      "prompt": "Use case: ads-marketing / product-mockup. Create one polished, photorealistic commercial email banner for Nova União Etiquetas, based on two REAL product photographs supplied as references. Image 1 is the actual blank adhesive label roll with EXACTLY TWO parallel columns of rectangular white labels; Image 2 is the actual continuous roll of blank white cardstock tags with perforated separations. Treat these as product identity references: preserve the paper color, two-column format, rounded label corners, relative proportions, roll cores, stock thickness and recognizable construction; do not invent new product shapes. Art direction: replenishment, ready-to-order label and tag supplies arranged on a dark navy blue packing workbench. One prominent adhesive roll and one tag roll, with a short paper tail, intentionally arranged as a restrained commercial still life. Strong clean white softbox key light, subtle blue rim light, crisp real paper texture, convincing contact shadows. Brand colors: deep navy #010A1B, institutional blue #2967A2 and restrained #4598EF highlights. Avoid artificial neon or glow. Wide horizontal composition, ideally 1536x768 (2:1), product group centered and large, enough safe margin around every product for mobile scaling; no tall empty header space. Background softly recedes into navy. The composition should feel like an art-directed retail supply campaign, not a generic catalog cutout, no collage seams. NO letters, words, prices, barcodes, badges, logos, watermarks, icons, buttons or graphics. All copy and CTA will be live HTML outside this image. This is an illustrative AI-created scene based on real products, not a photo of an actual customer or a warehouse.",
+      "master_path": "tmp/imagegen/01_reposicao_antecipada-source-v1.png",
+      "final_path": "templates/novembro-26/raw/01_reposicao_antecipada/images/hero-01_reposicao_antecipada-v1.jpg",
+      "width": 1104,
+      "height": 552,
+      "bytes": 66801,
+      "sha256": "5c04cd849c61d8d0b5f157c240d5a52dbe504822d89be604d1570fbc4ff9c682",
+      "master_sha256": "736d21e5eb2b987c2cea6cef35c74d64259e00fe04eea73480031d89db9d822d",
+      "source_generation_file": "exec-f2ff19d6-87a6-4421-befd-14b158d5bbc9.png",
+      "alt": "Composição ilustrativa com rolos de etiquetas adesivas e tags em uma bancada de reposição.",
+      "processing": "Redimensionamento proporcional para 1104x552 e compressao JPEG; sem corte ou alteracao de conteudo."
+    },
+    {
+      "key": "02_identificacao_e_preco",
+      "references": [
+        {
+          "path": "templates/novembro-26/raw/images/etiquetas-adesivas-referencia.jpg",
+          "role": "fotografia real do produto"
+        }
+      ],
+      "prompt": "Use case: ads-marketing / product-mockup. Make a photorealistic, detailed email hero photograph using the supplied REAL product photo as the product identity reference: a roll of white adhesive labels with EXACTLY TWO parallel columns, visible individual rounded rectangular labels and narrow release-liner gaps. Preserve its actual geometry and white paper stock, label proportions, two-column arrangement and relative width. This campaign is about buying labels for the next incoming retail merchandise shipment. Art-direct an elegant macro/three-quarter close-up: the same two-column roll and a short gently curving strip of its labels in the foreground, on a cool pale blue-gray packing surface; one small unfocused plain brown shipping carton in the far background gives incoming-merchandise context without stealing focus. Refined soft daylight from the upper left, gentle navy shadow, high local detail in paper edges and perforation/gaps, realistic matte paper texture rather than glossy plastic. Brand palette: institutional #2967A2, pale #F3F7FB and navy #010A1B; blue accents only in lighting/background, labels remain neutral white. Wide horizontal 2:1 composition ideally 1536x768, dominant product occupies most of the frame, clear at email width 552px and mobile width 350px, every critical edge safely inside the frame. New composition distinct from a dark product lineup: bright, tactile, product-led. DO NOT invent a third column or alter label dimensions. NO written text, prices, labels printed with claims, barcodes, logos, watermark, buttons, typography or UI. The email will supply the headline and real CTA as HTML. AI-created illustrative scene, not evidence of actual fulfillment or stock.",
+      "refinement_prompt": "Edit target: Image 1, the generated bright product scene. Identity reference: Image 2, the REAL two-column adhesive label roll. Make ONLY this targeted correction: the loose strip on the right foreground must have EXACTLY TWO side-by-side parallel columns of small rounded rectangular white labels, matching the actual two-column roll and real photo. Widen the release-liner strip if necessary to fit the same two labels per row. It must not remain a single-column strip. Keep the main large roll, its existing two columns, the cardboard box, pale blue packing surface, lighting, camera framing, paper color and texture, and all other scene details unchanged. No text, no barcodes, no logos, no added objects. Maintain the original horizontal 2:1 aspect ratio and sharp photorealistic detail.",
+      "master_path": "tmp/imagegen/02_identificacao_e_preco-source-v1.png",
+      "final_path": "templates/novembro-26/raw/02_identificacao_e_preco/images/hero-02_identificacao_e_preco-v1.jpg",
+      "width": 1104,
+      "height": 552,
+      "bytes": 74083,
+      "sha256": "5f411dec30785132d87cf0e6e3c32891ddb1e9756578ed6262ba202b69f185e3",
+      "master_sha256": "47bf849ef69ee8ecad66307805e6c9f4603c04fee8210a87715948217c6da75d",
+      "source_generation_file": "exec-a29f2aeb-5e0e-4fe7-b09b-e87ebb3acadd.png",
+      "alt": "Composição ilustrativa de etiquetas adesivas brancas em duas colunas, em detalhe.",
+      "processing": "Redimensionamento proporcional para 1104x552 e compressao JPEG; sem corte ou alteracao de conteudo."
+    },
+    {
+      "key": "03_ribbons_e_compatibilidade",
+      "references": [
+        {
+          "path": "templates/design-system/references/produtos/argoxiX6-250.jpg",
+          "role": "fotografia real do produto"
+        },
+        {
+          "path": "templates/novembro-26/raw/images/etiquetas-adesivas-referencia.jpg",
+          "role": "fotografia real do produto"
+        },
+        {
+          "path": "templates/design-system/references/post-Dcb-V8_oIgt.jpg",
+          "role": "arte de marca; orientacao visual, nao foto real"
+        }
+      ],
+      "prompt": "Use case: ads-marketing / product-mockup. Create a polished photorealistic ILLUSTRATIVE scene for an email about requesting a thermal-transfer ribbon quotation based on printer model. Reference roles: Image 1 is a REAL photograph of an Argox industrial label printer and defines the recognizable printer body, dark case, shape and realistic scale; do not redesign it into an invented futuristic machine. Image 2 is a REAL blank TWO-COLUMN adhesive label roll and defines paper/label material. Image 3 is an EXISTING BRAND POSTER: use ONLY the cylindrical ribbon-roll shapes and restrained technical blue mood as visual guidance, not its text, claims, brand mark, exact red/blue product colors or a verified product SKU. Main foreground subject is one realistically sized black thermal-transfer ribbon roll with visible hollow core and a short loose film end; it is an illustrative ribbon, not a claim of compatibility with the printer. The printer sits partly behind it, with a small roll of matching blank adhesive labels nearby. All items on a dark slate technical workbench, deep navy #010A1B background, realistic white side light defining black film sheen, subtle institutional blue #2967A2 rim light, carefully controlled reflections, physical contact shadows and real scale. Wide horizontal 2:1 frame ideally 1536x768, tight commercial product composition, focal ribbon and printer clearly legible at small email size. Preserve reference printer shape, do not show opened electronics, impossible mechanisms or fake operational claims. No hands or people. NO words, model numbers, logos, text from the poster, lettering, prices, diagrams, badges, checkmarks, compatibility symbols, barcodes, watermarks or buttons. The HTML will explain compatibility must be checked and will label the scene illustrative. This is not a photo documenting a real customer installation.",
+      "master_path": "tmp/imagegen/03_ribbons_e_compatibilidade-source-v1.png",
+      "final_path": "templates/novembro-26/raw/03_ribbons_e_compatibilidade/images/hero-03_ribbons_e_compatibilidade-v1.jpg",
+      "width": 1104,
+      "height": 552,
+      "bytes": 79649,
+      "sha256": "f12a9b3d9f3b87000c05b922cddfd893f1f2d41566dde8bba1815c3e96727ca1",
+      "master_sha256": "0032048b4e8a38e04d7dd5fd4a620e00d697d8117cc17c88aefe475d60911166",
+      "source_generation_file": "exec-905d9d1e-6ac5-4b49-8760-22ed33d07c48.png",
+      "alt": "Cena ilustrativa de ribbon, etiquetas e impressora de etiquetas em uma bancada técnica.",
+      "processing": "Redimensionamento proporcional para 1104x552 e compressao JPEG; sem corte ou alteracao de conteudo."
+    },
+    {
+      "key": "04_cotacao_simples",
+      "references": [
+        {
+          "path": "templates/novembro-26/raw/images/tags-impressao-referencia.jpg",
+          "role": "fotografia real do produto"
+        },
+        {
+          "path": "templates/novembro-26/raw/images/etiquetas-adesivas-referencia.jpg",
+          "role": "fotografia real do produto"
+        }
+      ],
+      "prompt": "Use case: ads-marketing / product-mockup. Create one distinctive, premium-looking but practical commercial email banner based on REAL Nova União retail-label product reference photographs. Image 1 is the actual continuous blank white cardstock TAG roll, its perforations, tag format and paper thickness must remain recognizable. Image 2 is the actual white ADHESIVE LABEL roll with TWO parallel columns of rounded rectangles, preserve this construction and proportions. Campaign objective: make a buyer want to ask for a quotation on WhatsApp. Create an editorial near-overhead retail-supply arrangement: a short curved strip of the referenced blank tags extending across a folded dark indigo denim garment, the tag roll beside it, and a compact two-column adhesive roll in a supporting position. Show the real material differences between cardstock tags and adhesive label stock. NO invented printed branding or extra hardware on tags. Deep navy textile, a restrained dark wooden retail counter edge and crisp neutral-white paper create tactile contrast, with very subtle brand-blue #2967A2 illumination. Warm natural paper highlights balanced with cool blue soft shadows, realistic fibers, edges and contact shadows; high-end commercial still life, not 3D plastic or floating objects. Wide 2:1 horizontal banner ideally 1536x768; products large and composed as a coherent single scene, no excessive negative space, safe edges for mobile scaling. Distinct from the other campaigns: close editorial fashion-retail angle, not another identical frontal product lineup. Absolutely NO words, letters, prices, printed barcodes, logos, labels with claims, watermarks, badges, buttons, UI or typography. All commercial copy and CTA remain live HTML. Illustrative AI-made arrangement using real product references, not a testimonial or depiction of an actual customer.",
+      "master_path": "tmp/imagegen/04_cotacao_simples-source-v1.png",
+      "final_path": "templates/novembro-26/raw/04_cotacao_simples/images/hero-04_cotacao_simples-v1.jpg",
+      "width": 1104,
+      "height": 552,
+      "bytes": 123541,
+      "sha256": "704261c94f357279cfc70b0d3f2cc15817dadab2dc887821710a730b60fae2b5",
+      "master_sha256": "11a37718b35bc901595bd3b29cfff11f38a2a0c253b679263cab1eb17641c2ba",
+      "source_generation_file": "exec-d7376bbb-bd26-46df-b10c-97ed66fb717e.png",
+      "alt": "Composição ilustrativa com rolos de tags e etiquetas sobre tecido jeans.",
+      "processing": "Redimensionamento proporcional para 1104x552 e compressao JPEG; sem corte ou alteracao de conteudo."
+    }
+  ]
+}
