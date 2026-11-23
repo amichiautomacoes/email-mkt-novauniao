@@ -63,7 +63,8 @@ def test_parse_schedule_csv_normalizes_accented_campaign_key_for_catalog_alias()
         ),
         ("02_identificacao_e_preco", "Chegou mercadoria? Cote as etiquetas"),
         ("03_ribbons_e_compatibilidade", "Cote o ribbon antes de comprar errado"),
-        ("04_cotacao_simples", "Peça sua cotação de etiquetas no WhatsApp"),
+        ("04_cotacao_simples", "Black Friday: prepare o estoque para o Natal"),
+        ("05_prazo_reposicao_black_friday", "Sua reposição chega a tempo para o Natal?"),
     ],
 )
 def test_november_schedule_renders_campaign_from_default_catalog(

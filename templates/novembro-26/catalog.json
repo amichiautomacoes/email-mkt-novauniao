@@ -12,8 +12,14 @@
     "images_validated": true
   },
   "04_cotacao_simples": {
-    "subject": "Peça sua cotação de etiquetas no WhatsApp",
+    "subject": "Black Friday: prepare o estoque para o Natal",
     "html": "04_cotacao_simples.html",
+    "links_validated": true,
+    "images_validated": true
+  },
+  "05_prazo_reposicao_black_friday": {
+    "subject": "Sua reposição chega a tempo para o Natal?",
+    "html": "05_prazo_reposicao_black_friday.html",
     "links_validated": true,
     "images_validated": true
   },
